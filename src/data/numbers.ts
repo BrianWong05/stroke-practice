@@ -28,8 +28,7 @@ export const numberPaths: StrokePath[] = [
     character: '1',
     viewBox: '0 0 100 140',
     paths: [
-      'M35 35 L50 20 L50 120',
-      'M30 120 L70 120'
+      'M50 20 L50 120'
     ]
   },
   {
@@ -43,8 +42,7 @@ export const numberPaths: StrokePath[] = [
     character: '3',
     viewBox: '0 0 100 140',
     paths: [
-      'M25 25 C40 15 70 15 75 35 C80 55 50 65 50 70',
-      'M50 70 C50 75 80 85 75 105 C70 125 40 125 25 115'
+      'M32 30 C45 12 78 12 78 40 C78 58 60 62 40 65 C65 68 82 78 82 105 C82 132 45 132 25 115'
     ]
   },
   {
@@ -59,15 +57,16 @@ export const numberPaths: StrokePath[] = [
     character: '5',
     viewBox: '0 0 100 140',
     paths: [
-      'M75 20 L25 20 L20 60',
-      'M20 60 C40 50 80 55 80 85 C80 115 50 125 20 110'
+      'M25 20 L20 60', // 1. Vertical stroke down
+      'M20 60 C40 50 80 55 80 85 C80 115 50 125 20 110', // 2. Curved belly
+      'M25 20 L75 20' // 3. Top horizontal stroke (Left to Right)
     ]
   },
   {
     character: '6',
     viewBox: '0 0 100 140',
     paths: [
-      'M70 25 C50 15 25 35 20 70 C15 105 35 125 55 125 C75 125 85 105 80 80 C75 55 55 55 40 70'
+      'M70 20 C45 20 25 50 25 85 C25 120 60 125 80 105 C90 90 80 65 55 65 C40 65 30 85 30 85'
     ]
   },
   {
@@ -81,15 +80,14 @@ export const numberPaths: StrokePath[] = [
     character: '8',
     viewBox: '0 0 100 140',
     paths: [
-      'M50 70 C25 55 25 25 50 20 C75 25 75 55 50 70',
-      'M50 70 C20 85 15 115 50 120 C85 115 80 85 50 70'
+      'M70 30 C60 15 40 15 30 30 C20 45 60 75 75 95 C85 115 65 125 50 125 C35 125 15 115 25 95 C40 75 80 45 70 30'
     ]
   },
   {
     character: '9',
     viewBox: '0 0 100 140',
     paths: [
-      'M60 70 C45 85 25 75 20 55 C15 35 35 15 55 15 C75 15 85 35 80 70 C75 105 50 125 30 115'
+      'M72 35 C55 15 25 35 25 55 C25 80 65 80 72 50 L 72 120'
     ]
   }
 ]
