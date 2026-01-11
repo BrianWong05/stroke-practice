@@ -1,0 +1,157 @@
+import { useEffect, useRef, useCallback, useState } from 'react'
+import HanziWriter from 'hanzi-writer'
+import { usePractice } from '@/hooks/usePractice'
+
+interface ChineseCanvasProps {
+  character: string
+}
+
+export default function ChineseCanvas({ character }: ChineseCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const writerRef = useRef<HanziWriter | null>(null)
+  const { showFeedback } = usePractice()
+  const [size, setSize] = useState(300)
+
+  // Observe container size
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const newSize = Math.min(rect.width, rect.height)
+        if (newSize > 0) {
+          setSize(newSize)
+        }
+      }
+    }
+
+    updateSize()
+
+    const resizeObserver = new ResizeObserver(updateSize)
+    resizeObserver.observe(containerRef.current)
+
+    return () => resizeObserver.disconnect()
+  }, [])
+
+  // Initialize HanziWriter
+  useEffect(() => {
+    if (!containerRef.current || !character || size <= 0) return
+
+    // Clear previous writer
+    containerRef.current.innerHTML = ''
+    writerRef.current = null
+
+    // Create new writer with fixed size
+    const writer = HanziWriter.create(containerRef.current, character, {
+      width: size,
+      height: size,
+      padding: 20,
+      showOutline: true,
+      showCharacter: false,
+      strokeAnimationSpeed: 0.3,
+      delayBetweenStrokes: 1000,
+      strokeColor: '#1e293b',
+      outlineColor: '#94a3b8',
+      drawingColor: '#6366f1',
+      radicalColor: '#818cf8',
+      highlightColor: '#a5b4fc',
+      showHintAfterMisses: 3,
+    })
+
+    writerRef.current = writer
+
+    // Start quiz mode
+    writer.quiz({
+      onCorrectStroke: () => {
+        // Stroke was correct
+      },
+      onMistake: () => {
+        showFeedback('error')
+      },
+      onComplete: () => {
+        showFeedback('success')
+      },
+    })
+
+    return () => {
+      writerRef.current = null
+    }
+  }, [character, showFeedback, size])
+
+  // Handle play button
+  const handlePlay = useCallback(() => {
+    if (writerRef.current) {
+      writerRef.current.cancelQuiz()
+      writerRef.current.showCharacter()
+      writerRef.current.animateCharacter({
+        onComplete: () => {
+          setTimeout(() => {
+            if (writerRef.current) {
+              writerRef.current.hideCharacter()
+              writerRef.current.quiz({
+                onMistake: () => showFeedback('error'),
+                onComplete: () => showFeedback('success'),
+              })
+            }
+          }, 500)
+        },
+      })
+    }
+  }, [showFeedback])
+
+  // Handle clear button
+  const handleClear = useCallback(() => {
+    if (writerRef.current) {
+      writerRef.current.cancelQuiz()
+      writerRef.current.hideCharacter()
+      writerRef.current.quiz({
+        onMistake: () => showFeedback('error'),
+        onComplete: () => showFeedback('success'),
+      })
+    }
+  }, [showFeedback])
+
+  // Connect to buttons
+  useEffect(() => {
+    const playBtn = document.getElementById('play-btn')
+    const clearBtn = document.getElementById('clear-btn')
+
+    if (playBtn) playBtn.addEventListener('click', handlePlay)
+    if (clearBtn) clearBtn.addEventListener('click', handleClear)
+
+    return () => {
+      if (playBtn) playBtn.removeEventListener('click', handlePlay)
+      if (clearBtn) clearBtn.removeEventListener('click', handleClear)
+    }
+  }, [handlePlay, handleClear])
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full relative bg-white rounded-lg flex items-center justify-center overflow-hidden"
+      style={{ touchAction: 'none' }}
+    >
+      {/* Tian Zi Ge grid overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          border: '2px solid #1e293b',
+          borderRadius: '0.5rem',
+        }}
+      >
+        {/* Horizontal center line */}
+        <div 
+          className="absolute left-0 right-0 h-px bg-slate-300" 
+          style={{ top: '50%', borderStyle: 'dashed' }}
+        />
+        {/* Vertical center line */}
+        <div 
+          className="absolute top-0 bottom-0 w-px bg-slate-300" 
+          style={{ left: '50%', borderStyle: 'dashed' }}
+        />
+      </div>
+    </div>
+  )
+}
+
