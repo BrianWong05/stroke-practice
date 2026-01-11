@@ -16,6 +16,8 @@ export const zhHK = {
   clear: '清除',
   next: '下一個',
   previous: '上一個',
+  nextStroke: '下一筆',
+  previousStroke: '上一筆',
   practice: '練習',
   
   // Feedback

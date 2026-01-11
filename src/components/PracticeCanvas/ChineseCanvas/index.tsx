@@ -9,8 +9,9 @@ interface ChineseCanvasProps {
 export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const writerRef = useRef<HanziWriter | null>(null)
-  const { showFeedback } = usePractice()
+  const { state, setTotalStrokes, resetStrokes } = usePractice()
   const [size, setSize] = useState(300)
+  const prevStrokeIndexRef = useRef(0)
 
   // Observe container size
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     // Clear previous writer
     containerRef.current.innerHTML = ''
     writerRef.current = null
+    prevStrokeIndexRef.current = 0
 
     // Create new writer with fixed size
     const writer = HanziWriter.create(containerRef.current, character, {
@@ -61,56 +63,79 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
 
     writerRef.current = writer
 
-    // Start quiz mode
-    writer.quiz({
-      onCorrectStroke: () => {
-        // Stroke was correct
-      },
-      onMistake: () => {
-        showFeedback('error')
-      },
-      onComplete: () => {
-        showFeedback('success')
-      },
+    // Get stroke count and set in context
+    const charData = HanziWriter.loadCharacterData(character)
+    charData.then((data) => {
+      if (data) {
+        setTotalStrokes(data.strokes.length)
+      }
+    }).catch(() => {
+      setTotalStrokes(1) // Fallback
     })
 
     return () => {
       writerRef.current = null
     }
-  }, [character, showFeedback, size])
+  }, [character, size, setTotalStrokes])
 
-  // Handle play button
+  // Handle stroke index changes from context
+  useEffect(() => {
+    if (!writerRef.current) return
+
+    const prevIndex = prevStrokeIndexRef.current
+    const newIndex = state.currentStrokeIndex
+
+    if (newIndex > prevIndex && prevIndex < state.totalStrokes) {
+      // Animate next stroke
+      writerRef.current.animateStroke(prevIndex, {
+        onComplete: () => {
+          // Stroke complete
+        },
+      })
+    } else if (newIndex < prevIndex) {
+      // Hide character and re-animate up to newIndex
+      writerRef.current.hideCharacter()
+      // Animate strokes up to newIndex
+      if (newIndex > 0) {
+        let currentStroke = 0
+        const animateNext = () => {
+          if (currentStroke < newIndex && writerRef.current) {
+            writerRef.current.animateStroke(currentStroke, {
+              onComplete: () => {
+                currentStroke++
+                if (currentStroke < newIndex) {
+                  animateNext()
+                }
+              },
+            })
+          }
+        }
+        animateNext()
+      }
+    }
+
+    prevStrokeIndexRef.current = newIndex
+  }, [state.currentStrokeIndex, state.totalStrokes])
+
+  // Handle play button - animate full character
   const handlePlay = useCallback(() => {
     if (writerRef.current) {
-      writerRef.current.cancelQuiz()
-      writerRef.current.showCharacter()
+      writerRef.current.hideCharacter()
       writerRef.current.animateCharacter({
         onComplete: () => {
-          setTimeout(() => {
-            if (writerRef.current) {
-              writerRef.current.hideCharacter()
-              writerRef.current.quiz({
-                onMistake: () => showFeedback('error'),
-                onComplete: () => showFeedback('success'),
-              })
-            }
-          }, 500)
+          resetStrokes()
         },
       })
     }
-  }, [showFeedback])
+  }, [resetStrokes])
 
   // Handle clear button
   const handleClear = useCallback(() => {
     if (writerRef.current) {
-      writerRef.current.cancelQuiz()
       writerRef.current.hideCharacter()
-      writerRef.current.quiz({
-        onMistake: () => showFeedback('error'),
-        onComplete: () => showFeedback('success'),
-      })
+      prevStrokeIndexRef.current = 0
     }
-  }, [showFeedback])
+  }, [])
 
   // Connect to buttons
   useEffect(() => {
@@ -154,4 +179,5 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     </div>
   )
 }
+
 

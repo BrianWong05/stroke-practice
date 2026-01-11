@@ -47,8 +47,14 @@ The following UI strings SHALL be used exactly:
 | Next | 下一個 |
 | Previous | 上一個 |
 | App Title | 練筆順 |
+| Previous Stroke | 上一筆 |
+| Next Stroke | 下一筆 |
 
 #### Scenario: String consistency
 - **WHEN** the app is deployed
 - **THEN** all UI strings match the reference table exactly
+
+#### Scenario: Stroke navigation labels
+- **WHEN** user views the stroke navigation buttons
+- **THEN** buttons display "上一筆" and "下一筆" respectively
 

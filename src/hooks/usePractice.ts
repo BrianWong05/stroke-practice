@@ -32,7 +32,6 @@ export function usePractice() {
 
   const showFeedback = useCallback((type: 'success' | 'error') => {
     dispatch({ type: 'SET_FEEDBACK', payload: type })
-    // Auto-hide after 2 seconds
     setTimeout(() => {
       dispatch({ type: 'SET_FEEDBACK', payload: null })
     }, 2000)
@@ -40,6 +39,23 @@ export function usePractice() {
 
   const clearCanvas = useCallback(() => {
     dispatch({ type: 'CLEAR_CANVAS' })
+  }, [dispatch])
+
+  // Stroke navigation
+  const nextStroke = useCallback(() => {
+    dispatch({ type: 'NEXT_STROKE' })
+  }, [dispatch])
+
+  const prevStroke = useCallback(() => {
+    dispatch({ type: 'PREV_STROKE' })
+  }, [dispatch])
+
+  const resetStrokes = useCallback(() => {
+    dispatch({ type: 'RESET_STROKES' })
+  }, [dispatch])
+
+  const setTotalStrokes = useCallback((count: number) => {
+    dispatch({ type: 'SET_TOTAL_STROKES', payload: count })
   }, [dispatch])
 
   const currentCharacter = state.characters[state.currentIndex] ?? ''
@@ -55,8 +71,13 @@ export function usePractice() {
     setAnimating,
     showFeedback,
     clearCanvas,
+    nextStroke,
+    prevStroke,
+    resetStrokes,
+    setTotalStrokes,
     currentCharacter,
     totalCharacters,
     progress,
   }
 }
+

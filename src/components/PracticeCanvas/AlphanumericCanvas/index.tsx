@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { CharacterCategory } from '@/context/PracticeContext'
 import { numberPaths, StrokePath } from '@/data/numbers'
 import { alphabetPaths } from '@/data/alphabet'
+import { usePractice } from '@/hooks/usePractice'
 
 interface AlphanumericCanvasProps {
   character: string
@@ -11,7 +12,8 @@ interface AlphanumericCanvasProps {
 export default function AlphanumericCanvas({ character, category }: AlphanumericCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [isAnimating, setIsAnimating] = useState(false)
-  const [animatedPaths, setAnimatedPaths] = useState<number[]>([])
+  const { state, setTotalStrokes, resetStrokes } = usePractice()
+  const prevStrokeIndexRef = useRef(0)
 
   // Get stroke data for current character
   const getStrokeData = useCallback((): StrokePath | undefined => {
@@ -23,34 +25,39 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
 
   const strokeData = getStrokeData()
 
-  // Reset animation when character changes
+  // Set total strokes and reset when character changes
   useEffect(() => {
-    setAnimatedPaths([])
-    setIsAnimating(false)
-  }, [character])
+    if (strokeData) {
+      setTotalStrokes(strokeData.paths.length)
+    } else {
+      setTotalStrokes(1)
+    }
+    prevStrokeIndexRef.current = 0
+  }, [character, strokeData, setTotalStrokes])
 
-  // Handle play animation
+  // Handle play animation - full character
   const handlePlay = useCallback(() => {
     if (!strokeData || isAnimating) return
 
     setIsAnimating(true)
-    setAnimatedPaths([])
 
     // Animate each path sequentially
     strokeData.paths.forEach((_, index) => {
       setTimeout(() => {
-        setAnimatedPaths(prev => [...prev, index])
         if (index === strokeData.paths.length - 1) {
-          setTimeout(() => setIsAnimating(false), 500)
+          setTimeout(() => {
+            setIsAnimating(false)
+            resetStrokes()
+          }, 500)
         }
       }, index * 2500)
     })
-  }, [strokeData, isAnimating])
+  }, [strokeData, isAnimating, resetStrokes])
 
   // Handle clear
   const handleClear = useCallback(() => {
-    setAnimatedPaths([])
     setIsAnimating(false)
+    prevStrokeIndexRef.current = 0
   }, [])
 
   // Connect to buttons
@@ -58,22 +65,17 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
     const playBtn = document.getElementById('play-btn')
     const clearBtn = document.getElementById('clear-btn')
 
-    if (playBtn) {
-      playBtn.addEventListener('click', handlePlay)
-    }
-    if (clearBtn) {
-      clearBtn.addEventListener('click', handleClear)
-    }
+    if (playBtn) playBtn.addEventListener('click', handlePlay)
+    if (clearBtn) clearBtn.addEventListener('click', handleClear)
 
     return () => {
-      if (playBtn) {
-        playBtn.removeEventListener('click', handlePlay)
-      }
-      if (clearBtn) {
-        clearBtn.removeEventListener('click', handleClear)
-      }
+      if (playBtn) playBtn.removeEventListener('click', handlePlay)
+      if (clearBtn) clearBtn.removeEventListener('click', handleClear)
     }
   }, [handlePlay, handleClear])
+
+  // Calculate visible strokes based on context state
+  const visibleStrokeCount = state.currentStrokeIndex
 
   if (!strokeData) {
     // Fallback for characters without path data
@@ -110,10 +112,10 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
           />
         ))}
 
-        {/* Animated stroke paths */}
+        {/* Visible stroke paths based on currentStrokeIndex */}
         {strokeData.paths.map((path, index) => {
-          const isVisible = animatedPaths.includes(index)
-          const isCurrentlyAnimating = animatedPaths.length === index + 1 && isAnimating
+          const isVisible = index < visibleStrokeCount
+          const isCurrentlyAnimating = index === visibleStrokeCount - 1 && isAnimating
 
           return (
             <path
@@ -152,3 +154,4 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
     </div>
   )
 }
+
