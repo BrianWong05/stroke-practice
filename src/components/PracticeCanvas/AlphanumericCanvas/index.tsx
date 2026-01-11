@@ -122,7 +122,7 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
               key={`stroke-${index}`}
               d={path}
               fill="none"
-              stroke="#6366f1"
+              stroke="#1e293b"
               strokeWidth="8"
               strokeLinecap="round"
               strokeLinejoin="round"

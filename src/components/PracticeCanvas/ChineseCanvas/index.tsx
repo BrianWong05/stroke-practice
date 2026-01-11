@@ -56,7 +56,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
       strokeColor: '#1e293b',
       outlineColor: '#94a3b8',
       drawingColor: '#6366f1',
-      radicalColor: '#818cf8',
+      radicalColor: '#1e293b', // Same as strokeColor
       highlightColor: '#a5b4fc',
       showHintAfterMisses: 3,
     })
@@ -93,24 +93,12 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
         },
       })
     } else if (newIndex < prevIndex) {
-      // Hide character and re-animate up to newIndex
+      // Hide character and show up to newIndex instantly
       writerRef.current.hideCharacter()
-      // Animate strokes up to newIndex
-      if (newIndex > 0) {
-        let currentStroke = 0
-        const animateNext = () => {
-          if (currentStroke < newIndex && writerRef.current) {
-            writerRef.current.animateStroke(currentStroke, {
-              onComplete: () => {
-                currentStroke++
-                if (currentStroke < newIndex) {
-                  animateNext()
-                }
-              },
-            })
-          }
-        }
-        animateNext()
+      // Show strokes up to newIndex
+      for (let i = 0; i < newIndex; i++) {
+        // cast to any because showStroke is missing from default types but exists in library
+        (writerRef.current as any).showStroke(i)
       }
     }
 
