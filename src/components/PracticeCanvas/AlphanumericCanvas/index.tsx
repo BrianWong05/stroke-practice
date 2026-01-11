@@ -11,7 +11,7 @@ interface AlphanumericCanvasProps {
 
 export default function AlphanumericCanvas({ character, category }: AlphanumericCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
-  const [isAnimating, setIsAnimating] = useState(false)
+  const [animatingStroke, setAnimatingStroke] = useState<number | null>(null)
   const { state, setTotalStrokes, resetStrokes } = usePractice()
   const prevStrokeIndexRef = useRef(0)
 
@@ -33,30 +33,51 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
       setTotalStrokes(1)
     }
     prevStrokeIndexRef.current = 0
+    setAnimatingStroke(null)
   }, [character, strokeData, setTotalStrokes])
+
+  // Handle stroke index changes - trigger animation when stepping forward
+  useEffect(() => {
+    const prevIndex = prevStrokeIndexRef.current
+    const newIndex = state.currentStrokeIndex
+
+    if (newIndex > prevIndex) {
+      // Moving forward - animate the new stroke
+      setAnimatingStroke(newIndex - 1)
+      // Clear animation flag after animation completes
+      const timer = setTimeout(() => {
+        setAnimatingStroke(null)
+      }, 3500)
+      prevStrokeIndexRef.current = newIndex
+      return () => clearTimeout(timer)
+    } else if (newIndex < prevIndex) {
+      // Moving backward - no animation needed
+      setAnimatingStroke(null)
+      prevStrokeIndexRef.current = newIndex
+    }
+  }, [state.currentStrokeIndex])
 
   // Handle play animation - full character
   const handlePlay = useCallback(() => {
-    if (!strokeData || isAnimating) return
-
-    setIsAnimating(true)
+    if (!strokeData || animatingStroke !== null) return
 
     // Animate each path sequentially
     strokeData.paths.forEach((_, index) => {
       setTimeout(() => {
+        setAnimatingStroke(index)
         if (index === strokeData.paths.length - 1) {
           setTimeout(() => {
-            setIsAnimating(false)
+            setAnimatingStroke(null)
             resetStrokes()
-          }, 500)
+          }, 3500)
         }
       }, index * 2500)
     })
-  }, [strokeData, isAnimating, resetStrokes])
+  }, [strokeData, animatingStroke, resetStrokes])
 
   // Handle clear
   const handleClear = useCallback(() => {
-    setIsAnimating(false)
+    setAnimatingStroke(null)
     prevStrokeIndexRef.current = 0
   }, [])
 
@@ -114,12 +135,12 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
 
         {/* Visible stroke paths based on currentStrokeIndex */}
         {strokeData.paths.map((path, index) => {
-          const isVisible = index < visibleStrokeCount
-          const isCurrentlyAnimating = index === visibleStrokeCount - 1 && isAnimating
+          const isVisible = index < visibleStrokeCount || index === animatingStroke
+          const isCurrentlyAnimating = index === animatingStroke
 
           return (
             <path
-              key={`stroke-${index}`}
+              key={`stroke-${index}-${isCurrentlyAnimating ? 'anim' : 'static'}`}
               d={path}
               fill="none"
               stroke="#1e293b"
@@ -129,7 +150,8 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
               className={isCurrentlyAnimating ? 'animate-draw' : ''}
               style={{
                 opacity: isVisible ? 1 : 0,
-                transition: 'opacity 0.3s ease',
+                strokeDasharray: isCurrentlyAnimating ? 1000 : 'none',
+                strokeDashoffset: isCurrentlyAnimating ? 1000 : 0,
               }}
             />
           )
@@ -148,10 +170,11 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
         }
         .animate-draw {
           stroke-dasharray: 1000;
-          animation: draw 2s ease-out forwards;
+          animation: draw 3.5s ease-out forwards;
         }
       `}</style>
     </div>
   )
 }
+
 
