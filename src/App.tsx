@@ -1,7 +1,9 @@
 import { PracticeProvider } from '@/context/PracticeContext'
 import Layout from '@/components/Layout'
 import CategorySelector from '@/components/CategorySelector'
+import CharacterGrid from '@/components/CharacterGrid'
 import PracticeCanvas from '@/components/PracticeCanvas'
+
 import { usePractice } from '@/hooks/usePractice'
 
 function AppContent() {
@@ -9,11 +11,12 @@ function AppContent() {
   
   return (
     <Layout>
-      {state.category === null ? (
-        <CategorySelector />
-      ) : (
-        <PracticeCanvas />
+      {state.view === 'categories' && <CategorySelector />}
+      {state.view === 'grid' && state.category && (
+        <CharacterGrid category={state.category} />
       )}
+      {state.view === 'practice' && <PracticeCanvas />}
+
     </Layout>
   )
 }

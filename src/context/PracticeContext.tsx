@@ -4,10 +4,14 @@ import { numbers } from '@/data/numbers'
 import { englishAlphabet } from '@/data/alphabet'
 
 export type CharacterCategory = 'numbers' | 'english' | 'chinese'
+export type ViewMode = 'categories' | 'grid' | 'practice'
+
 
 export interface PracticeState {
   category: CharacterCategory | null
+  view: ViewMode
   currentIndex: number
+
   characters: string[]
   isAnimating: boolean
   feedback: 'success' | 'error' | null
@@ -17,7 +21,10 @@ export interface PracticeState {
 
 type PracticeAction =
   | { type: 'SET_CATEGORY'; payload: CharacterCategory }
+  | { type: 'SELECT_CHARACTER'; payload: number }
+  | { type: 'BACK_TO_GRID' }
   | { type: 'GO_HOME' }
+
   | { type: 'NEXT_CHARACTER' }
   | { type: 'PREV_CHARACTER' }
   | { type: 'SET_ANIMATING'; payload: boolean }
@@ -41,7 +48,9 @@ function getCharactersForCategory(category: CharacterCategory): string[] {
 
 const initialState: PracticeState = {
   category: null,
+  view: 'categories',
   currentIndex: 0,
+
   characters: [],
   isAnimating: false,
   feedback: null,
@@ -56,14 +65,32 @@ function practiceReducer(state: PracticeState, action: PracticeAction): Practice
       return {
         ...state,
         category: action.payload,
+        view: 'grid',
         currentIndex: 0,
+
         characters,
         feedback: null,
         currentStrokeIndex: 0,
         totalStrokes: 0,
       }
     }
+    case 'SELECT_CHARACTER':
+      return {
+        ...state,
+        view: 'practice',
+        currentIndex: action.payload,
+        feedback: null,
+        currentStrokeIndex: 0,
+        totalStrokes: 0,
+      }
+    case 'BACK_TO_GRID':
+      return {
+        ...state,
+        view: 'grid',
+        feedback: null,
+      }
     case 'GO_HOME':
+
       return {
         ...initialState,
       }

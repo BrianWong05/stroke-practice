@@ -18,6 +18,15 @@ export function usePractice() {
     dispatch({ type: 'GO_HOME' })
   }, [dispatch])
 
+  const selectCharacter = useCallback((index: number) => {
+    dispatch({ type: 'SELECT_CHARACTER', payload: index })
+  }, [dispatch])
+
+  const backToGrid = useCallback(() => {
+    dispatch({ type: 'BACK_TO_GRID' })
+  }, [dispatch])
+
+
   const nextCharacter = useCallback(() => {
     dispatch({ type: 'NEXT_CHARACTER' })
   }, [dispatch])
@@ -66,6 +75,9 @@ export function usePractice() {
     state,
     selectCategory,
     goHome,
+    selectCharacter,
+    backToGrid,
+
     nextCharacter,
     prevCharacter,
     setAnimating,

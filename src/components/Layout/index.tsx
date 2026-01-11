@@ -8,8 +8,16 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { state, goHome } = usePractice()
-  const showBackButton = state.category !== null
+  const { state, goHome, backToGrid } = usePractice()
+  const showBackButton = state.view !== 'categories'
+
+  const handleBack = () => {
+    if (state.view === 'practice') {
+      backToGrid()
+    } else {
+      goHome()
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -17,7 +25,7 @@ export default function Layout({ children }: LayoutProps) {
       <header className="bg-white border-b border-slate-200 px-4 py-4 flex items-center gap-4 sticky top-0 z-50">
         {showBackButton && (
           <button
-            onClick={goHome}
+            onClick={handleBack}
             className="btn btn-icon btn-secondary"
             aria-label={t('back')}
           >

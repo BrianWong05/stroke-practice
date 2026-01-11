@@ -4,21 +4,19 @@
 TBD - created by archiving change add-stroke-practice-app. Update Purpose after archive.
 ## Requirements
 ### Requirement: Category Selection Home Page
-The system SHALL display a home page allowing users to select from three practice categories: 數字 (Numbers), 英文字母 (English Alphabet), and 中文字 (Chinese Characters).
+The system SHALL display a home page allowing users to select from three practice categories, navigating to their respective selection grids.
 
 #### Scenario: User selects Numbers category
-- **WHEN** user taps the "數字" button
-- **THEN** the practice interface loads with number characters (0-9)
+- **When** user taps the "數字" button
+- **Then** the Selection Grid for Numbers is displayed.
 
 #### Scenario: User selects English Alphabet category
-- **WHEN** user taps the "英文字母" button
-- **THEN** the practice interface loads with alphabet characters (A-Z, then a-z)
+- **When** user taps the "英文字母" button
+- **Then** the Selection Grid for English Alphabet is displayed.
 
 #### Scenario: User selects Chinese Characters category
-- **WHEN** user taps the "中文字" button
-- **THEN** the practice interface loads with the preset Traditional Chinese character list
-
----
+- **When** user taps the "中文字" button
+- **Then** the Selection Grid for Chinese Characters is displayed.
 
 ### Requirement: Category Button Presentation
 The system SHALL present each category as a visually distinct, large, touch-friendly button with an icon and Traditional Chinese label.

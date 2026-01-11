@@ -11,6 +11,13 @@ export const zhHK = {
   englishAlphabet: '英文字母',
   chineseCharacters: '中文字',
   
+  // Selection Grid Titles
+  selectNumbers: '請選擇數字',
+  selectEnglish: '請選擇英文字母',
+  selectChinese: '請選擇中文字',
+  uppercase: '大寫',
+  lowercase: '小寫',
+  
   // Practice Controls
   play: '播放',
   clear: '清除',
