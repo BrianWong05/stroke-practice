@@ -47,6 +47,7 @@ export default function PracticeCanvas() {
         <button 
           className="btn btn-secondary" 
           onClick={prevCharacter}
+          disabled={state.isAnimating}
           aria-label={t('previous')}
         >
           <ChevronLeft size={20} />
@@ -58,10 +59,10 @@ export default function PracticeCanvas() {
           <button 
             className="btn btn-secondary btn-icon"
             onClick={prevStroke}
-            disabled={!canPrevStroke}
+            disabled={!canPrevStroke || state.isAnimating}
             aria-label={t('previousStroke')}
             title={t('previousStroke')}
-            style={{ opacity: canPrevStroke ? 1 : 0.5 }}
+            style={{ opacity: (!canPrevStroke || state.isAnimating) ? 0.5 : 1 }}
           >
             <ChevronsLeft size={20} />
           </button>
@@ -69,7 +70,9 @@ export default function PracticeCanvas() {
           <button 
             className="btn btn-primary" 
             id="play-btn"
+            disabled={state.isAnimating}
             aria-label={t('play')}
+            style={{ opacity: state.isAnimating ? 0.5 : 1 }}
           >
             <Play size={20} />
             <span>{t('play')}</span>
@@ -78,10 +81,10 @@ export default function PracticeCanvas() {
           <button 
             className="btn btn-secondary btn-icon"
             onClick={nextStroke}
-            disabled={!canNextStroke}
+            disabled={!canNextStroke || state.isAnimating}
             aria-label={t('nextStroke')}
             title={t('nextStroke')}
-            style={{ opacity: canNextStroke ? 1 : 0.5 }}
+            style={{ opacity: (!canNextStroke || state.isAnimating) ? 0.5 : 1 }}
           >
             <ChevronsRight size={20} />
           </button>
@@ -91,7 +94,9 @@ export default function PracticeCanvas() {
         <button 
           className="btn btn-secondary" 
           id="clear-btn"
+          disabled={state.isAnimating}
           aria-label={t('clear')}
+          style={{ opacity: state.isAnimating ? 0.5 : 1 }}
         >
           <Eraser size={20} />
           <span className="hidden md:inline">{t('clear')}</span>
@@ -101,6 +106,7 @@ export default function PracticeCanvas() {
         <button 
           className="btn btn-secondary" 
           onClick={nextCharacter}
+          disabled={state.isAnimating}
           aria-label={t('next')}
         >
           <span className="hidden md:inline">{t('next')}</span>

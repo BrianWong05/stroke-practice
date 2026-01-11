@@ -12,8 +12,14 @@ interface AlphanumericCanvasProps {
 export default function AlphanumericCanvas({ character, category }: AlphanumericCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [animatingStroke, setAnimatingStroke] = useState<number | null>(null)
-  const { state, setTotalStrokes, resetStrokes } = usePractice()
+  const [isPlayMode, setIsPlayMode] = useState(false)
+  const { state, setTotalStrokes, setAnimating, resetStrokes } = usePractice()
   const prevStrokeIndexRef = useRef(0)
+  const justFinishedPlayRef = useRef(false)
+
+  // Animation durations
+  const STROKE_DURATION = 5000 // 5s animation for all strokes
+  const PLAY_DELAY = 1000 // 1s delay between strokes in play mode
 
   // Get stroke data for current character
   const getStrokeData = useCallback((): StrokePath | undefined => {
@@ -33,7 +39,9 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
       setTotalStrokes(1)
     }
     prevStrokeIndexRef.current = 0
+    justFinishedPlayRef.current = false
     setAnimatingStroke(null)
+    setIsPlayMode(false)
   }, [character, strokeData, setTotalStrokes])
 
   // Handle stroke index changes - trigger animation when stepping forward
@@ -41,39 +49,55 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
     const prevIndex = prevStrokeIndexRef.current
     const newIndex = state.currentStrokeIndex
 
-    if (newIndex > prevIndex) {
-      // Moving forward - animate the new stroke
+    // Check if we should skip animation due to play finish
+    if (justFinishedPlayRef.current) {
+      justFinishedPlayRef.current = false
+      prevStrokeIndexRef.current = newIndex
+      setAnimatingStroke(null)
+      return
+    }
+
+    if (newIndex === prevIndex + 1 && !isPlayMode) {
+      // Moving forward manually by 1 step - animate
       setAnimatingStroke(newIndex - 1)
-      // Clear animation flag after animation completes
       const timer = setTimeout(() => {
         setAnimatingStroke(null)
-      }, 3500)
+      }, STROKE_DURATION)
       prevStrokeIndexRef.current = newIndex
       return () => clearTimeout(timer)
-    } else if (newIndex < prevIndex) {
-      // Moving backward - no animation needed
+    } else if (newIndex !== prevIndex) {
+      // Other changes (backward, or jump/reset) - no animation, just update ref
       setAnimatingStroke(null)
       prevStrokeIndexRef.current = newIndex
     }
-  }, [state.currentStrokeIndex])
+  }, [state.currentStrokeIndex, isPlayMode])
 
-  // Handle play animation - full character
+  // Handle play animation - same speed but faster sequencing
   const handlePlay = useCallback(() => {
     if (!strokeData || animatingStroke !== null) return
 
-    // Animate each path sequentially
+    setIsPlayMode(true)
+    setAnimating(true)
+    
+    // Animate each path sequentially with overlapping timing
     strokeData.paths.forEach((_, index) => {
       setTimeout(() => {
         setAnimatingStroke(index)
         if (index === strokeData.paths.length - 1) {
           setTimeout(() => {
             setAnimatingStroke(null)
-            resetStrokes()
-          }, 3500)
+            
+            // Prevent next index change from animating
+            justFinishedPlayRef.current = true
+            
+            setIsPlayMode(false)
+            setAnimating(false)
+            resetStrokes() // Maintain visibility
+          }, 2000) // Re-enable buttons sooner (2s after last stroke starts)
         }
-      }, index * 2500)
+      }, index * PLAY_DELAY)
     })
-  }, [strokeData, animatingStroke, resetStrokes])
+  }, [strokeData, animatingStroke, setAnimating, resetStrokes])
 
   // Handle clear
   const handleClear = useCallback(() => {
@@ -103,7 +127,7 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
     return (
       <div className="w-full h-full handwriting-lines relative bg-white rounded-lg flex items-center justify-center">
         <span 
-          className="text-8xl text-slate-300 font-bold"
+          className="text-[12rem] text-slate-300 font-bold leading-none"
           style={{ fontFamily: 'system-ui, sans-serif' }}
         >
           {character}
@@ -113,11 +137,12 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
   }
 
   return (
-    <div className="w-full h-full handwriting-lines relative bg-white rounded-lg overflow-hidden">
+    <div className="w-full h-full handwriting-lines relative bg-white rounded-lg overflow-hidden flex items-center justify-center p-4">
       <svg
         ref={svgRef}
         viewBox={strokeData.viewBox}
-        className="w-full h-full"
+        className="w-full h-full max-w-[300px] max-h-[300px]"
+        preserveAspectRatio="xMidYMid meet"
         style={{ touchAction: 'none' }}
       >
         {/* Ghost outline - always visible */}
@@ -135,7 +160,11 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
 
         {/* Visible stroke paths based on currentStrokeIndex */}
         {strokeData.paths.map((path, index) => {
-          const isVisible = index < visibleStrokeCount || index === animatingStroke
+          // In play mode, show all strokes up to and including the animating stroke
+          // In manual mode, show strokes based on currentStrokeIndex
+          const isVisible = isPlayMode 
+            ? (animatingStroke !== null && index <= animatingStroke)
+            : (index < visibleStrokeCount || index === animatingStroke)
           const isCurrentlyAnimating = index === animatingStroke
 
           return (
@@ -147,11 +176,11 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
               strokeWidth="8"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={isCurrentlyAnimating ? 'animate-draw' : ''}
               style={{
                 opacity: isVisible ? 1 : 0,
                 strokeDasharray: isCurrentlyAnimating ? 1000 : 'none',
                 strokeDashoffset: isCurrentlyAnimating ? 1000 : 0,
+                animation: isCurrentlyAnimating ? 'draw 5s ease-out forwards' : 'none',
               }}
             />
           )
@@ -170,7 +199,7 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
         }
         .animate-draw {
           stroke-dasharray: 1000;
-          animation: draw 3.5s ease-out forwards;
+          animation: draw 5s ease-out forwards;
         }
       `}</style>
     </div>

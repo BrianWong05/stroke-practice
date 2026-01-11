@@ -9,7 +9,7 @@ interface ChineseCanvasProps {
 export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const writerRef = useRef<HanziWriter | null>(null)
-  const { state, setTotalStrokes, resetStrokes } = usePractice()
+  const { state, setTotalStrokes, setAnimating } = usePractice()
   const [size, setSize] = useState(300)
   const prevStrokeIndexRef = useRef(0)
 
@@ -87,9 +87,10 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
 
     if (newIndex > prevIndex && prevIndex < state.totalStrokes) {
       // Animate next stroke
+      setAnimating(true)
       writerRef.current.animateStroke(prevIndex, {
         onComplete: () => {
-          // Stroke complete
+          setAnimating(false)
         },
       })
     } else if (newIndex < prevIndex) {
@@ -103,19 +104,22 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     }
 
     prevStrokeIndexRef.current = newIndex
-  }, [state.currentStrokeIndex, state.totalStrokes])
+  }, [state.currentStrokeIndex, state.totalStrokes, setAnimating])
 
   // Handle play button - animate full character
   const handlePlay = useCallback(() => {
     if (writerRef.current) {
+      setAnimating(true)
       writerRef.current.hideCharacter()
       writerRef.current.animateCharacter({
         onComplete: () => {
-          resetStrokes()
+          setAnimating(false)
+          // Keep character visible, do not reset
+          // resetStrokes() 
         },
       })
     }
-  }, [resetStrokes])
+  }, [setAnimating])
 
   // Handle clear button
   const handleClear = useCallback(() => {
