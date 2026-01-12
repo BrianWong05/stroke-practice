@@ -1,4 +1,4 @@
-import { Play, Eraser, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { Play, Eraser, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, EyeOff } from 'lucide-react'
 import { t } from '@/i18n'
 import { usePractice } from '@/hooks/usePractice'
 import ChineseCanvas from './ChineseCanvas'
@@ -15,6 +15,7 @@ export default function PracticeCanvas() {
     nextStroke,
     prevStroke,
     resetStrokes,
+    toggleGuidelines,
   } = usePractice()
 
   const isChinese = state.category === 'chinese'
@@ -98,10 +99,23 @@ export default function PracticeCanvas() {
           onClick={resetStrokes}
           disabled={state.isAnimating}
           aria-label={t('clear')}
+          title={t('clear')}
           style={{ opacity: state.isAnimating ? 0.5 : 1 }}
         >
           <Eraser size={20} />
           <span className="hidden md:inline">{t('clear')}</span>
+        </button>
+
+        {/* Toggle Guidelines Button */}
+        <button
+          className="btn btn-secondary btn-icon"
+          onClick={toggleGuidelines}
+          disabled={state.isAnimating}
+          aria-label={state.showGuidelines ? t('hideGuidelines') : t('showGuidelines')}
+          title={state.showGuidelines ? t('hideGuidelines') : t('showGuidelines')}
+          style={{ opacity: state.isAnimating ? 0.5 : 1 }}
+        >
+          {state.showGuidelines ? <Eye size={20} /> : <EyeOff size={20} />}
         </button>
 
         {/* Next Character */}

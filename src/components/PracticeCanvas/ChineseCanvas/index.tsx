@@ -254,7 +254,8 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
               {strokeData.strokes.map((strokePath, index) => {
                 // During play mode, use animatedStrokeCount; otherwise use currentStrokeIndex
                 const completedCount = isPlayMode ? animatedStrokeCount : state.currentStrokeIndex
-                const isCompleted = index < completedCount
+                // Hide if completed OR if guidelines are toggled off
+                const isHidden = !state.showGuidelines || index < completedCount
                 return (
                   <path
                     key={`guideline-stroke-${index}`}
@@ -267,7 +268,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
                     strokeLinejoin="round"
                     strokeDasharray="40 20"
                     style={{
-                      opacity: isCompleted ? 0 : 1,
+                      opacity: isHidden ? 0 : 1,
                       transition: 'opacity 0.3s ease-out'
                     }}
                   />
@@ -281,13 +282,14 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
                 if (!startPoint) return null
                 // During play mode, use animatedStrokeCount; otherwise use currentStrokeIndex
                 const completedCount = isPlayMode ? animatedStrokeCount : state.currentStrokeIndex
-                const isCompleted = index < completedCount
+                // Hide if completed OR if guidelines are toggled off
+                const isHidden = !state.showGuidelines || index < completedCount
                 return (
                   <g 
                     key={`number-${index}`} 
                     transform={`translate(${startPoint[0]}, ${startPoint[1]}) scale(1, -1)`}
                     style={{
-                      opacity: isCompleted ? 0 : 1,
+                      opacity: isHidden ? 0 : 1,
                       transition: 'opacity 0.3s ease-out'
                     }}
                   >

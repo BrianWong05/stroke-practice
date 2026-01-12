@@ -71,6 +71,10 @@ export function usePractice() {
     dispatch({ type: 'SET_TOTAL_STROKES', payload: count })
   }, [dispatch])
 
+  const toggleGuidelines = useCallback(() => {
+    dispatch({ type: 'TOGGLE_GUIDELINES' })
+  }, [dispatch])
+
   const currentCharacter = state.characters[state.currentIndex] ?? ''
   const totalCharacters = state.characters.length
   const progress = `${state.currentIndex + 1} / ${totalCharacters}`
@@ -92,6 +96,7 @@ export function usePractice() {
     resetStrokes,
     showFullCharacter,
     setTotalStrokes,
+    toggleGuidelines,
     currentCharacter,
     totalCharacters,
     progress,

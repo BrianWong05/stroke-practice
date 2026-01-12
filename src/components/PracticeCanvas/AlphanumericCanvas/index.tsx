@@ -164,7 +164,7 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
           paths={strokeData.paths}
           viewBox={strokeData.viewBox}
           startPoints={startPoints}
-          visible={true}
+          visible={state.showGuidelines}
           completedCount={guidelineCompletedCount}
         />
 

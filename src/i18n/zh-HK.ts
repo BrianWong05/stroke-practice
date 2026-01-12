@@ -36,6 +36,10 @@ export const zhHK = {
   
   // Navigation
   back: '返回',
+  
+  // Guideline Toggle
+  showGuidelines: '顯示筆順',
+  hideGuidelines: '隱藏筆順',
 } as const
 
 export type TranslationKey = keyof typeof zhHK

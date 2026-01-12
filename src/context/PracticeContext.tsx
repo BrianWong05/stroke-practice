@@ -17,6 +17,7 @@ export interface PracticeState {
   feedback: 'success' | 'error' | null
   currentStrokeIndex: number
   totalStrokes: number
+  showGuidelines: boolean
 }
 
 type PracticeAction =
@@ -35,6 +36,7 @@ type PracticeAction =
   | { type: 'RESET_STROKES' }
   | { type: 'SHOW_FULL_CHARACTER' }
   | { type: 'SET_TOTAL_STROKES'; payload: number }
+  | { type: 'TOGGLE_GUIDELINES' }
 
 function getCharactersForCategory(category: CharacterCategory): string[] {
   switch (category) {
@@ -57,6 +59,7 @@ const initialState: PracticeState = {
   feedback: null,
   currentStrokeIndex: 0,
   totalStrokes: 0,
+  showGuidelines: true,
 }
 
 function practiceReducer(state: PracticeState, action: PracticeAction): PracticeState {
@@ -139,6 +142,8 @@ function practiceReducer(state: PracticeState, action: PracticeAction): Practice
       return { ...state, currentStrokeIndex: state.totalStrokes }
     case 'SET_TOTAL_STROKES':
       return { ...state, totalStrokes: action.payload, currentStrokeIndex: 0 }
+    case 'TOGGLE_GUIDELINES':
+      return { ...state, showGuidelines: !state.showGuidelines }
     default:
       return state
   }
