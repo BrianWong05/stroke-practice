@@ -16,8 +16,9 @@ export const loadHanziData = (char: string, onLoad: (data: any) => void, onError
   }
 
   if (isPreset) {
-    // Load from local public folder
-    loadFromUrl(`/hanzi-data/${char}.json`)
+    // Load from local public folder, respecting the base URL
+    // import.meta.env.BASE_URL includes the trailing slash
+    loadFromUrl(`${import.meta.env.BASE_URL}hanzi-data/${char}.json`)
   } else {
     // Fallback to CDN for custom characters
     loadFromUrl(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/${char}.json`)

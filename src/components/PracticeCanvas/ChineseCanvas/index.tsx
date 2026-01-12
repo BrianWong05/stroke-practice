@@ -31,7 +31,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   // Track correct strokes in quiz mode
   const [quizStrokeCount, setQuizStrokeCount] = useState(0)
   const [isPlayMode, setIsPlayMode] = useState(false)
-  const [loadErrorType, setLoadErrorType] = useState<'offline' | 'notFound' | null>(null)
+  const [loadError, setLoadError] = useState<{ type: 'offline' | 'notFound', message: string } | null>(null)
 
 
   // Observe container size
@@ -67,7 +67,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     writerRef.current = null
     prevStrokeIndexRef.current = 0
     setQuizStrokeCount(0)
-    setLoadErrorType(null)
+    setLoadError(null)
 
     // Create new writer with fixed size
     const writer = HanziWriter.create(hanziRef.current, character, {
@@ -86,8 +86,11 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
       showHintAfterMisses: 3,
       drawingWidth: 40,
       charDataLoader: loadHanziData,
-      onLoadCharDataError: () => {
-        setLoadErrorType(!navigator.onLine ? 'offline' : 'notFound')
+      onLoadCharDataError: (err: any) => {
+        setLoadError({
+          type: !navigator.onLine ? 'offline' : 'notFound',
+          message: err?.message || String(err) || 'Unknown error'
+        })
       }
     })
 
@@ -114,12 +117,15 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
           medians: data.medians
         })
       }
-    }).catch(() => {
+    }).catch((err) => {
       setTotalStrokes(1) // Fallback
       setStrokeData(null)
       // Error handling is done in onLoadCharDataError of the writer instance
       // But we set it here too just in case loadCharacterData fails first
-      setLoadErrorType(!navigator.onLine ? 'offline' : 'notFound')
+      setLoadError({
+        type: !navigator.onLine ? 'offline' : 'notFound',
+        message: err?.message || String(err) || 'Unknown error'
+      })
     })
 
     return () => {
@@ -259,14 +265,17 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   }, [handlePlay, handleClear])
 
   // Fallback UI when character data fails to load
-  if (loadErrorType) {
+  if (loadError) {
     return (
       <div
         ref={containerRef}
         className="w-full h-full relative bg-white rounded-lg flex flex-col items-center justify-center overflow-hidden p-8"
       >
-        <p className="text-xl text-slate-600 mb-6 text-center font-chinese">
-          {loadErrorType === 'offline' ? t('offlineLoadError') : t('charNotFound')}
+        <p className="text-xl text-slate-600 mb-2 text-center font-chinese">
+          {loadError.type === 'offline' ? t('offlineLoadError') : t('charNotFound')}
+        </p>
+        <p className="text-xs text-slate-400 mb-6 text-center max-w-[80%] break-all">
+          Top Debug: {loadError.message}
         </p>
         <button
           onClick={backToGrid}
