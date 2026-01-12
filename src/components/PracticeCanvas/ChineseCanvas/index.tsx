@@ -22,6 +22,9 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const prevStrokeIndexRef = useRef(0)
   const justFinishedPlayRef = useRef(false)
   const [strokeData, setStrokeData] = useState<StrokeGuidelineData | null>(null)
+  // Track animated strokes during play mode for progressive guideline hiding
+  const [animatedStrokeCount, setAnimatedStrokeCount] = useState(0)
+  const [isPlayMode, setIsPlayMode] = useState(false)
 
 
   // Observe container size
@@ -130,24 +133,47 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     prevStrokeIndexRef.current = newIndex
   }, [state.currentStrokeIndex, state.totalStrokes, setAnimating])
 
-  // Handle play button - animate full character
+  // Handle play button - animate strokes one by one with callbacks for progressive hiding
   const handlePlay = useCallback(() => {
-    if (writerRef.current) {
-      resetStrokes()
-      writerRef.current.hideCharacter()
-      setAnimating(true)
+    if (!writerRef.current || !strokeData) return
+    
+    resetStrokes()
+    writerRef.current.hideCharacter()
+    setAnimating(true)
+    setIsPlayMode(true)
+    setAnimatedStrokeCount(0)
+    
+    const totalStrokes = strokeData.strokes.length
+    
+    // Animate strokes sequentially with callbacks
+    const animateNextStroke = (strokeIndex: number) => {
+      if (!writerRef.current || strokeIndex >= totalStrokes) {
+        // All strokes done
+        setAnimating(false)
+        setIsPlayMode(false)
+        justFinishedPlayRef.current = true
+        showFullCharacter()
+        return
+      }
       
-      setTimeout(() => {
-        writerRef.current?.animateCharacter({
-          onComplete: () => {
-            setAnimating(false)
-            justFinishedPlayRef.current = true
-            showFullCharacter()
-          },
-        })
-      }, 500)
+      // Update animated count to hide this stroke's guideline
+      setAnimatedStrokeCount(strokeIndex + 1)
+      
+      writerRef.current.animateStroke(strokeIndex, {
+        onComplete: () => {
+          // Small delay between strokes for visual clarity
+          setTimeout(() => {
+            animateNextStroke(strokeIndex + 1)
+          }, 300)
+        },
+      })
     }
-  }, [setAnimating, resetStrokes, showFullCharacter])
+    
+    // Start animation after a brief delay
+    setTimeout(() => {
+      animateNextStroke(0)
+    }, 500)
+  }, [strokeData, setAnimating, resetStrokes, showFullCharacter])
 
   // Handle clear button
   const handleClear = useCallback(() => {
@@ -226,7 +252,9 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
             <g transform="scale(1, -1) translate(0, -900)">
               {/* Dashed stroke paths - hide completed strokes */}
               {strokeData.strokes.map((strokePath, index) => {
-                const isCompleted = index < state.currentStrokeIndex
+                // During play mode, use animatedStrokeCount; otherwise use currentStrokeIndex
+                const completedCount = isPlayMode ? animatedStrokeCount : state.currentStrokeIndex
+                const isCompleted = index < completedCount
                 return (
                   <path
                     key={`guideline-stroke-${index}`}
@@ -251,7 +279,9 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
                 // First point of each median is the stroke start
                 const startPoint = median[0]
                 if (!startPoint) return null
-                const isCompleted = index < state.currentStrokeIndex
+                // During play mode, use animatedStrokeCount; otherwise use currentStrokeIndex
+                const completedCount = isPlayMode ? animatedStrokeCount : state.currentStrokeIndex
+                const isCompleted = index < completedCount
                 return (
                   <g 
                     key={`number-${index}`} 

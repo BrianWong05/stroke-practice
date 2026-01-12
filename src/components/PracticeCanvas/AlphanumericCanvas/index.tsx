@@ -134,6 +134,13 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
   // Calculate visible strokes based on context state
   const visibleStrokeCount = state.currentStrokeIndex
 
+  // During play mode, use animatingStroke to determine which guidelines to hide
+  // (hide all strokes up to and including the one currently animating)
+  // During manual mode, use visibleStrokeCount (currentStrokeIndex)
+  const guidelineCompletedCount = isPlayMode && animatingStroke !== null
+    ? animatingStroke + 1  // Hide guidelines for strokes that have started animating
+    : visibleStrokeCount
+
   if (!strokeData) {
     // Fallback for characters without path data
     return (
@@ -158,7 +165,7 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
           viewBox={strokeData.viewBox}
           startPoints={startPoints}
           visible={true}
-          completedCount={visibleStrokeCount}
+          completedCount={guidelineCompletedCount}
         />
 
         <svg
