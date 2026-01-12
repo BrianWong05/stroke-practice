@@ -90,6 +90,20 @@ export default function StrokeGuideline({
         pointerEvents: 'none'
       }}
     >
+      <defs>
+        <marker
+          id="guideline-arrow"
+          viewBox="0 0 10 10"
+          refX="5"
+          refY="5"
+          markerWidth="3"
+          markerHeight="3"
+          orient="auto-start-reverse"
+        >
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#d1d5db" />
+        </marker>
+      </defs>
+
       {/* Dashed stroke paths */}
       {paths.map((path, index) => {
         const isCompleted = index < completedCount
@@ -104,6 +118,7 @@ export default function StrokeGuideline({
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeDasharray="8 4"
+            markerEnd="url(#guideline-arrow)"
             style={{
               opacity: isCompleted ? 0 : 1,
               transition: 'opacity 0.3s ease-out'
