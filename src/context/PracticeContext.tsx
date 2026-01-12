@@ -11,6 +11,7 @@ export interface PracticeState {
   category: CharacterCategory | null
   view: ViewMode
   currentIndex: number
+  customCharacter: string | null
 
   characters: string[]
   isAnimating: boolean
@@ -37,6 +38,7 @@ type PracticeAction =
   | { type: 'SHOW_FULL_CHARACTER' }
   | { type: 'SET_TOTAL_STROKES'; payload: number }
   | { type: 'TOGGLE_GUIDELINES' }
+  | { type: 'SET_CUSTOM_CHARACTER'; payload: string }
 
 function getCharactersForCategory(category: CharacterCategory): string[] {
   switch (category) {
@@ -53,6 +55,7 @@ const initialState: PracticeState = {
   category: null,
   view: 'categories',
   currentIndex: 0,
+  customCharacter: null,
 
   characters: [],
   isAnimating: false,
@@ -83,6 +86,7 @@ function practiceReducer(state: PracticeState, action: PracticeAction): Practice
         ...state,
         view: 'practice',
         currentIndex: action.payload,
+        customCharacter: null,
         feedback: null,
         currentStrokeIndex: 0,
         totalStrokes: 0,
@@ -91,6 +95,7 @@ function practiceReducer(state: PracticeState, action: PracticeAction): Practice
       return {
         ...state,
         view: 'grid',
+        customCharacter: null,
         feedback: null,
       }
     case 'GO_HOME':
@@ -144,6 +149,15 @@ function practiceReducer(state: PracticeState, action: PracticeAction): Practice
       return { ...state, totalStrokes: action.payload, currentStrokeIndex: 0 }
     case 'TOGGLE_GUIDELINES':
       return { ...state, showGuidelines: !state.showGuidelines }
+    case 'SET_CUSTOM_CHARACTER':
+      return {
+        ...state,
+        view: 'practice',
+        customCharacter: action.payload,
+        feedback: null,
+        currentStrokeIndex: 0,
+        totalStrokes: 0,
+      }
     default:
       return state
   }

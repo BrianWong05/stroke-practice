@@ -2,6 +2,7 @@ import { t } from '@/i18n'
 import { usePractice } from '@/hooks/usePractice'
 import { CharacterCategory } from '@/context/PracticeContext'
 import { uppercaseAlphabet, lowercaseAlphabet } from '@/data/alphabet'
+import CustomCharacterInput from '@/components/CustomCharacterInput'
 
 interface CharacterGridProps {
   category: CharacterCategory
@@ -60,16 +61,21 @@ export default function CharacterGrid({ category }: CharacterGridProps) {
 
     // Default Grid (Numbers & Chinese)
     return (
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-        {state.characters.map((char, index) => (
-          <button
-            key={char}
-            className="bg-white rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all aspect-square flex items-center justify-center text-4xl font-bold text-slate-700 border border-slate-100 active:bg-slate-50 font-chinese" 
-            onClick={() => selectCharacter(index)}
-          >
-            {char}
-          </button>
-        ))}
+      <div>
+        {/* Custom Character Input - only for Chinese */}
+        {category === 'chinese' && <CustomCharacterInput />}
+
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+          {state.characters.map((char, index) => (
+            <button
+              key={char}
+              className="bg-white rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all aspect-square flex items-center justify-center text-4xl font-bold text-slate-700 border border-slate-100 active:bg-slate-50 font-chinese" 
+              onClick={() => selectCharacter(index)}
+            >
+              {char}
+            </button>
+          ))}
+        </div>
       </div>
     )
   }
@@ -84,7 +90,7 @@ export default function CharacterGrid({ category }: CharacterGridProps) {
       </header>
 
       {/* Grid Content */}
-      <div className="flex-1 overflow-y-auto pb-8 pr-2">
+      <div className="flex-1 overflow-y-auto pb-8 pr-2 pt-2">
         {renderGrid()}
       </div>
     </div>

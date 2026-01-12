@@ -75,9 +75,15 @@ export function usePractice() {
     dispatch({ type: 'TOGGLE_GUIDELINES' })
   }, [dispatch])
 
-  const currentCharacter = state.characters[state.currentIndex] ?? ''
+  const setCustomCharacter = useCallback((char: string) => {
+    dispatch({ type: 'SET_CUSTOM_CHARACTER', payload: char })
+  }, [dispatch])
+
+  const currentCharacter = state.customCharacter ?? state.characters[state.currentIndex] ?? ''
   const totalCharacters = state.characters.length
-  const progress = `${state.currentIndex + 1} / ${totalCharacters}`
+  const progress = state.customCharacter 
+    ? '自定義' 
+    : `${state.currentIndex + 1} / ${totalCharacters}`
 
   return {
     state,
@@ -97,6 +103,7 @@ export function usePractice() {
     showFullCharacter,
     setTotalStrokes,
     toggleGuidelines,
+    setCustomCharacter,
     currentCharacter,
     totalCharacters,
     progress,

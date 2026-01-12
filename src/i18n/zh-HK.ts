@@ -41,6 +41,13 @@ export const zhHK = {
   // Guideline Toggle
   showGuidelines: '顯示筆順',
   hideGuidelines: '隱藏筆順',
+
+  // Custom Character Input
+  customInputPlaceholder: '輸入想練習的中文字 (例如: 龍)',
+  startPractice: '開始練習',
+  invalidChineseInput: '請輸入中文字',
+  charNotFound: '找不到此字的筆順資料',
+  customProgress: '自定義',
 } as const
 
 export type TranslationKey = keyof typeof zhHK

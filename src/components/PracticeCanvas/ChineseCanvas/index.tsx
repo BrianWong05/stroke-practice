@@ -1,5 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import HanziWriter from 'hanzi-writer'
+import { ArrowLeft } from 'lucide-react'
+import { t } from '@/i18n'
 import { usePractice } from '@/hooks/usePractice'
 import NumberIndicator from '@/components/shared/StrokeGuideline/NumberIndicator'
 
@@ -17,7 +19,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const hanziRef = useRef<HTMLDivElement>(null)  // Separate ref for hanzi-writer
   const writerRef = useRef<HanziWriter | null>(null)
-  const { state, setTotalStrokes, setAnimating, resetStrokes, showFeedback } = usePractice()
+  const { state, setTotalStrokes, setAnimating, resetStrokes, showFeedback, backToGrid } = usePractice()
   const [size, setSize] = useState(300)
   const prevStrokeIndexRef = useRef(0)
   const justFinishedPlayRef = useRef(false)
@@ -27,6 +29,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   // Track correct strokes in quiz mode
   const [quizStrokeCount, setQuizStrokeCount] = useState(0)
   const [isPlayMode, setIsPlayMode] = useState(false)
+  const [loadError, setLoadError] = useState(false)
 
 
   // Observe container size
@@ -62,6 +65,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     writerRef.current = null
     prevStrokeIndexRef.current = 0
     setQuizStrokeCount(0)
+    setLoadError(false)
 
     // Create new writer with fixed size
     const writer = HanziWriter.create(hanziRef.current, character, {
@@ -107,6 +111,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     }).catch(() => {
       setTotalStrokes(1) // Fallback
       setStrokeData(null)
+      setLoadError(true)
     })
 
     return () => {
@@ -244,6 +249,28 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
       if (clearBtn) clearBtn.removeEventListener('click', handleClear)
     }
   }, [handlePlay, handleClear])
+
+  // Fallback UI when character data fails to load
+  if (loadError) {
+    return (
+      <div
+        ref={containerRef}
+        className="w-full h-full relative bg-white rounded-lg flex flex-col items-center justify-center overflow-hidden p-8"
+      >
+        <p className="text-xl text-slate-600 mb-6 text-center font-chinese">
+          {t('charNotFound')}
+        </p>
+        <button
+          onClick={backToGrid}
+          className="btn btn-secondary"
+          aria-label={t('back')}
+        >
+          <ArrowLeft size={20} />
+          <span>{t('back')}</span>
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div
