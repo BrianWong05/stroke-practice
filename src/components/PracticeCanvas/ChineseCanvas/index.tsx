@@ -24,6 +24,8 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const [strokeData, setStrokeData] = useState<StrokeGuidelineData | null>(null)
   // Track animated strokes during play mode for progressive guideline hiding
   const [animatedStrokeCount, setAnimatedStrokeCount] = useState(0)
+  // Track correct strokes in quiz mode
+  const [quizStrokeCount, setQuizStrokeCount] = useState(0)
   const [isPlayMode, setIsPlayMode] = useState(false)
 
 
@@ -56,7 +58,10 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     // Clear previous writer
     hanziRef.current.innerHTML = ''
     writerRef.current = null
+    hanziRef.current.innerHTML = ''
+    writerRef.current = null
     prevStrokeIndexRef.current = 0
+    setQuizStrokeCount(0)
 
     // Create new writer with fixed size
     const writer = HanziWriter.create(hanziRef.current, character, {
@@ -82,6 +87,9 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     writer.quiz({
       onComplete: () => {
         showFeedback('success')
+      },
+      onCorrectStroke: () => {
+        setQuizStrokeCount(prev => prev + 1)
       }
     })
 
@@ -155,8 +163,11 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     writerRef.current.hideCharacter()
     writerRef.current.showOutline()
     setAnimating(true)
+    writerRef.current.showOutline()
+    setAnimating(true)
     setIsPlayMode(true)
     setAnimatedStrokeCount(0)
+    setQuizStrokeCount(0)
     
     const totalStrokes = strokeData.strokes.length
     
@@ -172,8 +183,12 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
         setTimeout(() => {
            // Reset for quiz
            writerRef.current?.hideCharacter()
+           setQuizStrokeCount(0)
            writerRef.current?.quiz({
-             onComplete: () => showFeedback('success')
+             onComplete: () => showFeedback('success'),
+             onCorrectStroke: () => {
+               setQuizStrokeCount(prev => prev + 1)
+             }
            })
         }, 1000)
         return
@@ -205,9 +220,13 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
       writerRef.current.hideCharacter()
       writerRef.current.showOutline()
       prevStrokeIndexRef.current = 0
+      setQuizStrokeCount(0)
       // Restart quiz
       writerRef.current.quiz({
-        onComplete: () => showFeedback('success')
+        onComplete: () => showFeedback('success'),
+        onCorrectStroke: () => {
+          setQuizStrokeCount(prev => prev + 1)
+        }
       })
     }
   }, [showFeedback])
@@ -281,8 +300,9 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
             <g transform="scale(1, -1) translate(0, -900)">
               {/* Dashed stroke paths - hide completed strokes */}
               {strokeData.strokes.map((strokePath, index) => {
-                // During play mode, use animatedStrokeCount; otherwise use currentStrokeIndex
-                const completedCount = isPlayMode ? animatedStrokeCount : state.currentStrokeIndex
+                // During play mode, use animatedStrokeCount; otherwise use currentStrokeIndex OR quizStrokeCount (whichever is higher/relevant)
+                // Since currentStrokeIndex from context likely stays 0 in quiz mode unless synced, we rely on quizStrokeCount
+                const completedCount = isPlayMode ? animatedStrokeCount : Math.max(state.currentStrokeIndex, quizStrokeCount)
                 // Hide if completed OR if guidelines are toggled off
                 const isHidden = !state.showGuidelines || index < completedCount
                 return (
@@ -309,8 +329,8 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
                 // First point of each median is the stroke start
                 const startPoint = median[0]
                 if (!startPoint) return null
-                // During play mode, use animatedStrokeCount; otherwise use currentStrokeIndex
-                const completedCount = isPlayMode ? animatedStrokeCount : state.currentStrokeIndex
+                // During play mode, use animatedStrokeCount; otherwise use currentStrokeIndex OR quizStrokeCount
+                const completedCount = isPlayMode ? animatedStrokeCount : Math.max(state.currentStrokeIndex, quizStrokeCount)
                 // Hide if completed OR if guidelines are toggled off
                 const isHidden = !state.showGuidelines || index < completedCount
                 return (
