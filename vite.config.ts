@@ -21,6 +21,8 @@ export default defineConfig({
         name: 'Stroke Practice',
         short_name: 'Stroke',
         description: 'Chinese stroke order practice app',
+        display: 'standalone',
+        background_color: '#ffffff',
         theme_color: '#ffffff',
         icons: [
           {
