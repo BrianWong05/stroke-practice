@@ -48,6 +48,7 @@ export const zhHK = {
   invalidChineseInput: '請輸入中文字',
   charNotFound: '找不到此字的筆順資料',
   customProgress: '自定義',
+  offlineLoadError: '請連接互聯網以加載此新字',
 } as const
 
 export type TranslationKey = keyof typeof zhHK

@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { t } from '@/i18n'
 import { usePractice } from '@/hooks/usePractice'
 import NumberIndicator from '@/components/shared/StrokeGuideline/NumberIndicator'
+import { loadHanziData } from '@/utils/hanziDataLoader'
 
 interface ChineseCanvasProps {
   character: string
@@ -27,9 +28,10 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   // Track animated strokes during play mode for progressive guideline hiding
   const [animatedStrokeCount, setAnimatedStrokeCount] = useState(0)
   // Track correct strokes in quiz mode
+  // Track correct strokes in quiz mode
   const [quizStrokeCount, setQuizStrokeCount] = useState(0)
   const [isPlayMode, setIsPlayMode] = useState(false)
-  const [loadError, setLoadError] = useState(false)
+  const [loadErrorType, setLoadErrorType] = useState<'offline' | 'notFound' | null>(null)
 
 
   // Observe container size
@@ -65,7 +67,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     writerRef.current = null
     prevStrokeIndexRef.current = 0
     setQuizStrokeCount(0)
-    setLoadError(false)
+    setLoadErrorType(null)
 
     // Create new writer with fixed size
     const writer = HanziWriter.create(hanziRef.current, character, {
@@ -83,6 +85,10 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
       highlightColor: '#a5b4fc',
       showHintAfterMisses: 3,
       drawingWidth: 40,
+      charDataLoader: loadHanziData,
+      onLoadCharDataError: () => {
+        setLoadErrorType(!navigator.onLine ? 'offline' : 'notFound')
+      }
     })
 
     writerRef.current = writer
@@ -98,7 +104,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     })
 
     // Get stroke count and stroke data for guidelines
-    const charData = HanziWriter.loadCharacterData(character)
+    const charData = HanziWriter.loadCharacterData(character, { charDataLoader: loadHanziData })
     charData.then((data) => {
       if (data) {
         setTotalStrokes(data.strokes.length)
@@ -111,7 +117,9 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     }).catch(() => {
       setTotalStrokes(1) // Fallback
       setStrokeData(null)
-      setLoadError(true)
+      // Error handling is done in onLoadCharDataError of the writer instance
+      // But we set it here too just in case loadCharacterData fails first
+      setLoadErrorType(!navigator.onLine ? 'offline' : 'notFound')
     })
 
     return () => {
@@ -251,14 +259,14 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   }, [handlePlay, handleClear])
 
   // Fallback UI when character data fails to load
-  if (loadError) {
+  if (loadErrorType) {
     return (
       <div
         ref={containerRef}
         className="w-full h-full relative bg-white rounded-lg flex flex-col items-center justify-center overflow-hidden p-8"
       >
         <p className="text-xl text-slate-600 mb-6 text-center font-chinese">
-          {t('charNotFound')}
+          {loadErrorType === 'offline' ? t('offlineLoadError') : t('charNotFound')}
         </p>
         <button
           onClick={backToGrid}
