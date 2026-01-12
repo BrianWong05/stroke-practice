@@ -12,6 +12,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const { state, setTotalStrokes, setAnimating, resetStrokes, showFullCharacter } = usePractice()
   const [size, setSize] = useState(300)
   const prevStrokeIndexRef = useRef(0)
+  const justFinishedPlayRef = useRef(false)
 
   // Observe container size
   useEffect(() => {
@@ -85,6 +86,13 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     const prevIndex = prevStrokeIndexRef.current
     const newIndex = state.currentStrokeIndex
 
+    // Check if we should skip animation due to play finish
+    if (justFinishedPlayRef.current) {
+      justFinishedPlayRef.current = false
+      prevStrokeIndexRef.current = newIndex
+      return
+    }
+
     if (newIndex > prevIndex && prevIndex < state.totalStrokes) {
       // Animate next stroke
       setAnimating(true)
@@ -117,6 +125,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
         writerRef.current?.animateCharacter({
           onComplete: () => {
             setAnimating(false)
+            justFinishedPlayRef.current = true
             showFullCharacter()
           },
         })
