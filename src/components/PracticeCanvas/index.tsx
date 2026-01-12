@@ -14,6 +14,7 @@ export default function PracticeCanvas() {
     prevCharacter,
     nextStroke,
     prevStroke,
+    resetStrokes,
   } = usePractice()
 
   const isChinese = state.category === 'chinese'
@@ -94,6 +95,7 @@ export default function PracticeCanvas() {
         <button 
           className="btn btn-secondary" 
           id="clear-btn"
+          onClick={resetStrokes}
           disabled={state.isAnimating}
           aria-label={t('clear')}
           style={{ opacity: state.isAnimating ? 0.5 : 1 }}

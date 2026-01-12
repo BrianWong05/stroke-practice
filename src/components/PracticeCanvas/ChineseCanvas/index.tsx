@@ -9,7 +9,7 @@ interface ChineseCanvasProps {
 export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const writerRef = useRef<HanziWriter | null>(null)
-  const { state, setTotalStrokes, setAnimating } = usePractice()
+  const { state, setTotalStrokes, setAnimating, resetStrokes, showFullCharacter } = usePractice()
   const [size, setSize] = useState(300)
   const prevStrokeIndexRef = useRef(0)
 
@@ -109,17 +109,20 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   // Handle play button - animate full character
   const handlePlay = useCallback(() => {
     if (writerRef.current) {
-      setAnimating(true)
+      resetStrokes()
       writerRef.current.hideCharacter()
-      writerRef.current.animateCharacter({
-        onComplete: () => {
-          setAnimating(false)
-          // Keep character visible, do not reset
-          // resetStrokes() 
-        },
-      })
+      setAnimating(true)
+      
+      setTimeout(() => {
+        writerRef.current?.animateCharacter({
+          onComplete: () => {
+            setAnimating(false)
+            showFullCharacter()
+          },
+        })
+      }, 500)
     }
-  }, [setAnimating])
+  }, [setAnimating, resetStrokes, showFullCharacter])
 
   // Handle clear button
   const handleClear = useCallback(() => {

@@ -13,13 +13,14 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
   const svgRef = useRef<SVGSVGElement>(null)
   const [animatingStroke, setAnimatingStroke] = useState<number | null>(null)
   const [isPlayMode, setIsPlayMode] = useState(false)
-  const { state, setTotalStrokes, setAnimating, resetStrokes } = usePractice()
+  const { state, setTotalStrokes, setAnimating, resetStrokes, showFullCharacter } = usePractice()
   const prevStrokeIndexRef = useRef(0)
   const justFinishedPlayRef = useRef(false)
 
   // Animation durations
   const STROKE_DURATION = 5000 // 5s animation for all strokes
   const PLAY_DELAY = 1000 // 1s delay between strokes in play mode
+  const START_DELAY = 500 // Initial delay to show clear state
 
   // Get stroke data for current character
   const getStrokeData = useCallback((): StrokePath | undefined => {
@@ -74,8 +75,9 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
 
   // Handle play animation - same speed but faster sequencing
   const handlePlay = useCallback(() => {
-    if (!strokeData || animatingStroke !== null) return
+    if (!strokeData) return
 
+    resetStrokes()
     setIsPlayMode(true)
     setAnimating(true)
     
@@ -92,12 +94,12 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
             
             setIsPlayMode(false)
             setAnimating(false)
-            resetStrokes() // Maintain visibility
-          }, 2000) // Re-enable buttons sooner (2s after last stroke starts)
+            showFullCharacter() // Keep character visible at end
+          }, STROKE_DURATION + 500) // Small buffer to ensure animation finishes visually
         }
-      }, index * PLAY_DELAY)
+      }, index * PLAY_DELAY + START_DELAY)
     })
-  }, [strokeData, animatingStroke, setAnimating, resetStrokes])
+  }, [strokeData, setAnimating, resetStrokes, showFullCharacter])
 
   // Handle clear
   const handleClear = useCallback(() => {

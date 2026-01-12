@@ -63,6 +63,10 @@ export function usePractice() {
     dispatch({ type: 'RESET_STROKES' })
   }, [dispatch])
 
+  const showFullCharacter = useCallback(() => {
+    dispatch({ type: 'SHOW_FULL_CHARACTER' })
+  }, [dispatch])
+
   const setTotalStrokes = useCallback((count: number) => {
     dispatch({ type: 'SET_TOTAL_STROKES', payload: count })
   }, [dispatch])
@@ -86,6 +90,7 @@ export function usePractice() {
     nextStroke,
     prevStroke,
     resetStrokes,
+    showFullCharacter,
     setTotalStrokes,
     currentCharacter,
     totalCharacters,

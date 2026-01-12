@@ -33,6 +33,7 @@ type PracticeAction =
   | { type: 'NEXT_STROKE' }
   | { type: 'PREV_STROKE' }
   | { type: 'RESET_STROKES' }
+  | { type: 'SHOW_FULL_CHARACTER' }
   | { type: 'SET_TOTAL_STROKES'; payload: number }
 
 function getCharactersForCategory(category: CharacterCategory): string[] {
@@ -133,6 +134,8 @@ function practiceReducer(state: PracticeState, action: PracticeAction): Practice
       }
       return { ...state, currentStrokeIndex: state.currentStrokeIndex - 1 }
     case 'RESET_STROKES':
+      return { ...state, currentStrokeIndex: 0 }
+    case 'SHOW_FULL_CHARACTER':
       return { ...state, currentStrokeIndex: state.totalStrokes }
     case 'SET_TOTAL_STROKES':
       return { ...state, totalStrokes: action.payload, currentStrokeIndex: 0 }
