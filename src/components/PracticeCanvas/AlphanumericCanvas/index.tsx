@@ -152,12 +152,13 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
     <div className="w-full h-full handwriting-lines relative bg-white rounded-lg overflow-hidden flex items-center justify-center p-4">
       {/* Container for both guideline and character SVG to ensure alignment */}
       <div className="relative w-full h-full max-w-[300px] max-h-[300px]">
-        {/* Stroke order guidelines - visible by default */}
+        {/* Stroke order guidelines - visible by default, hides progressively as strokes complete */}
         <StrokeGuideline
           paths={strokeData.paths}
           viewBox={strokeData.viewBox}
           startPoints={startPoints}
           visible={true}
+          completedCount={visibleStrokeCount}
         />
 
         <svg

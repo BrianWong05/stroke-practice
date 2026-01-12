@@ -224,28 +224,43 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
           >
             {/* Transform group to flip Y-axis (Make Me a Hanzi uses top-left at (0,900)) */}
             <g transform="scale(1, -1) translate(0, -900)">
-              {/* Dashed stroke paths */}
-              {strokeData.strokes.map((strokePath, index) => (
-                <path
-                  key={`guideline-stroke-${index}`}
-                  d={strokePath}
-                  className="stroke-guideline-path"
-                  fill="none"
-                  stroke="#d1d5db"
-                  strokeWidth="20"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeDasharray="40 20"
-                />
-              ))}
+              {/* Dashed stroke paths - hide completed strokes */}
+              {strokeData.strokes.map((strokePath, index) => {
+                const isCompleted = index < state.currentStrokeIndex
+                return (
+                  <path
+                    key={`guideline-stroke-${index}`}
+                    d={strokePath}
+                    className="stroke-guideline-path"
+                    fill="none"
+                    stroke="#d1d5db"
+                    strokeWidth="20"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="40 20"
+                    style={{
+                      opacity: isCompleted ? 0 : 1,
+                      transition: 'opacity 0.3s ease-out'
+                    }}
+                  />
+                )
+              })}
 
-              {/* Number indicators at stroke starting points */}
+              {/* Number indicators at stroke starting points - hide completed strokes */}
               {strokeData.medians.map((median, index) => {
                 // First point of each median is the stroke start
                 const startPoint = median[0]
                 if (!startPoint) return null
+                const isCompleted = index < state.currentStrokeIndex
                 return (
-                  <g key={`number-${index}`} transform={`translate(${startPoint[0]}, ${startPoint[1]}) scale(1, -1)`}>
+                  <g 
+                    key={`number-${index}`} 
+                    transform={`translate(${startPoint[0]}, ${startPoint[1]}) scale(1, -1)`}
+                    style={{
+                      opacity: isCompleted ? 0 : 1,
+                      transition: 'opacity 0.3s ease-out'
+                    }}
+                  >
                     <NumberIndicator
                       number={index}
                       x={0}

@@ -16,6 +16,8 @@ interface StrokeGuidelineProps {
   startPoints: StrokeStartPoint[]
   visible?: boolean
   className?: string
+  /** Number of completed strokes - guidelines for these strokes will be hidden */
+  completedCount?: number
 }
 
 /**
@@ -39,7 +41,8 @@ export default function StrokeGuideline({
   viewBox,
   startPoints,
   visible = true,
-  className = ''
+  className = '',
+  completedCount = 0
 }: StrokeGuidelineProps) {
   if (!visible || paths.length === 0) {
     return null
@@ -60,30 +63,47 @@ export default function StrokeGuideline({
       }}
     >
       {/* Dashed stroke paths */}
-      {paths.map((path, index) => (
-        <path
-          key={`guideline-${index}`}
-          d={path}
-          className="stroke-guideline-path"
-          fill="none"
-          stroke="#d1d5db"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray="8 4"
-        />
-      ))}
+      {paths.map((path, index) => {
+        const isCompleted = index < completedCount
+        return (
+          <path
+            key={`guideline-${index}`}
+            d={path}
+            className="stroke-guideline-path"
+            fill="none"
+            stroke="#d1d5db"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="8 4"
+            style={{
+              opacity: isCompleted ? 0 : 1,
+              transition: 'opacity 0.3s ease-out'
+            }}
+          />
+        )
+      })}
 
       {/* Number indicators at start points */}
-      {startPoints.map((point, index) => (
-        <NumberIndicator
-          key={`number-${index}`}
-          number={index}
-          x={point.x}
-          y={point.y}
-          size={14}
-        />
-      ))}
+      {startPoints.map((point, index) => {
+        const isCompleted = index < completedCount
+        return (
+          <g
+            key={`number-${index}`}
+            style={{
+              opacity: isCompleted ? 0 : 1,
+              transition: 'opacity 0.3s ease-out'
+            }}
+          >
+            <NumberIndicator
+              number={index}
+              x={point.x}
+              y={point.y}
+              size={14}
+            />
+          </g>
+        )
+      })}
     </svg>
   )
 }
