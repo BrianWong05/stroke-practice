@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/stroke-practice/sw.js', { scope: '/stroke-practice/' })})}
