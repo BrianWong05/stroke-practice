@@ -43,7 +43,7 @@ export const uppercasePaths: StrokePath[] = [
     viewBox: '0 0 100 140',
     paths: [
       'M25 20 L25 120',
-      'M25 20 L60 20 C85 20 85 65 50 70',
+      'M25 20 L60 20 C85 20 85 65 50 70 L25 70',
       'M25 70 L55 70 C90 70 90 120 60 120 L25 120'
     ]
   },
@@ -66,8 +66,10 @@ export const uppercasePaths: StrokePath[] = [
     character: 'E',
     viewBox: '0 0 100 140',
     paths: [
-      'M75 20 L25 20 L25 120 L75 120',
-      'M25 70 L60 70'
+      'M25 20 L25 120', // 1. Vertical straight line
+      'M25 20 L75 20',  // 2. Top horizontal
+      'M25 70 L60 70',  // 3. Middle horizontal
+      'M25 120 L75 120' // 4. Bottom horizontal
     ]
   },
   {
@@ -118,7 +120,7 @@ export const uppercasePaths: StrokePath[] = [
     paths: [
       'M25 20 L25 120',
       'M75 20 L25 70',
-      'M40 55 L75 120'
+      'M25 70 L75 120'
     ]
   },
   {
@@ -132,19 +134,19 @@ export const uppercasePaths: StrokePath[] = [
     character: 'M',
     viewBox: '0 0 100 140',
     paths: [
-      'M20 120 L20 20',
-      'M20 20 L50 80',
-      'M50 80 L80 20',
-      'M80 20 L80 120'
+      'M20 20 L20 120', // 1. Vertical straight line down
+      'M20 20 L50 120', // 2. Diagonal down to center
+      'M50 120 L80 20', // 3. Diagonal up to right
+      'M80 20 L80 120'  // 4. Vertical straight line down
     ]
   },
   {
     character: 'N',
     viewBox: '0 0 100 140',
     paths: [
-      'M25 120 L25 20',
-      'M25 20 L75 120',
-      'M75 120 L75 20'
+      'M25 20 L25 120', // 1. Vertical down
+      'M25 20 L75 120', // 2. Diagonal down
+      'M75 120 L75 20'  // 3. Vertical up
     ]
   },
   {
@@ -176,7 +178,7 @@ export const uppercasePaths: StrokePath[] = [
     paths: [
       'M25 20 L25 120',
       'M25 20 L60 20 C90 25 90 65 60 70 L25 70',
-      'M55 70 L80 120'
+      'M25 70 L80 120'
     ]
   },
   {
@@ -190,8 +192,8 @@ export const uppercasePaths: StrokePath[] = [
     character: 'T',
     viewBox: '0 0 100 140',
     paths: [
-      'M20 20 L80 20',
-      'M50 20 L50 120'
+      'M50 20 L50 120', // 1. Vertical straight line down
+      'M20 20 L80 20'   // 2. Top horizontal bar
     ]
   },
   {
@@ -276,8 +278,8 @@ export const lowercasePaths: StrokePath[] = [
     character: 'd',
     viewBox: '0 0 100 140',
     paths: [
-      'M70 20 L70 95',
-      'M70 55 C65 40 40 40 35 55 C30 75 35 95 50 95 C65 95 70 80 70 55'
+      'M70 55 C65 40 40 40 35 55 C30 75 35 95 50 95 C65 95 70 80 70 55', // 1. Loop
+      'M70 20 L70 95' // 2. Stem
     ]
   },
   {
@@ -315,16 +317,16 @@ export const lowercasePaths: StrokePath[] = [
     character: 'i',
     viewBox: '0 0 100 140',
     paths: [
-      'M50 35 L50 37',
-      'M50 50 L50 95'
+      'M50 50 L50 95', // 1. Stem
+      'M50 35 L50 37'  // 2. Dot
     ]
   },
   {
     character: 'j',
     viewBox: '0 0 100 140',
     paths: [
-      'M55 35 L55 37',
-      'M55 50 L55 110 C55 130 35 130 25 115'
+      'M55 50 L55 110 C55 130 35 130 25 115', // 1. Tail
+      'M55 35 L55 37' // 2. Dot
     ]
   },
   {
@@ -333,7 +335,7 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M30 20 L30 95',
       'M65 50 L30 75',
-      'M45 65 L70 95'
+      'M30 75 L70 95'
     ]
   },
   {
@@ -379,8 +381,8 @@ export const lowercasePaths: StrokePath[] = [
     character: 'q',
     viewBox: '0 0 100 140',
     paths: [
-      'M70 50 L70 120',
-      'M70 55 C65 40 40 40 35 55 C30 75 35 95 50 95 C65 95 70 80 70 55'
+      'M70 55 C65 40 40 40 35 55 C30 75 35 95 50 95 C65 95 70 80 70 55', // 1. Loop
+      'M70 50 L70 120' // 2. Stem
     ]
   },
   {
@@ -445,7 +447,7 @@ export const lowercasePaths: StrokePath[] = [
     viewBox: '0 0 100 140',
     paths: [
       'M30 50 L50 80',
-      'M70 50 L40 110 C35 120 25 115 25 110'
+      'M70 50 L30 130'
     ]
   },
   {
