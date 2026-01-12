@@ -1,4 +1,5 @@
 import NumberIndicator from './NumberIndicator'
+import { parsePathTangent } from '@/utils/pathGeometry'
 
 /**
  * Stroke order guideline overlay component
@@ -21,11 +22,38 @@ interface StrokeGuidelineProps {
 }
 
 /**
- * Parse the starting point coordinates from an SVG path string
- * Handles paths starting with M (moveto) command
+ * Calculate the indicator position for a stroke path.
+ * Uses smart positioning (reverse tangent offset) to avoid overlaps.
+ * Clamps result to be within viewBox (or reasonable bounds) to prevents clipping.
  */
-export function parsePathStartPoint(path: string): StrokeStartPoint | null {
-  // Match M followed by coordinates (supports both comma and space separators)
+export function getIndicatorPosition(path: string, viewBoxStr: string = '0 0 100 140'): StrokeStartPoint | null {
+  const geometry = parsePathTangent(path)
+  
+  if (geometry) {
+    const OFFSET_DISTANCE = 22 // Distance to pull back the indicator
+    
+    let x = geometry.startPoint.x - (geometry.startTangent.x * OFFSET_DISTANCE)
+    let y = geometry.startPoint.y - (geometry.startTangent.y * OFFSET_DISTANCE)
+    
+    // Parse viewBox to clamp values
+    // viewBox format: "min-x min-y width height"
+    const vbParts = viewBoxStr.split(' ').map(parseFloat)
+    if (vbParts.length === 4) {
+      const [minX, minY, width, height] = vbParts
+      const margin = 8 // Keep at least 8 units from edge
+      
+      x = Math.max(minX + margin, Math.min(minX + width - margin, x))
+      y = Math.max(minY + margin, Math.min(minY + height - margin, y))
+    } else {
+        // Fallback clamping if viewBox parsing fails
+        x = Math.max(5, x)
+        y = Math.max(5, y)
+    }
+
+    return { x, y }
+  }
+
+  // Fallback: simple regex match for Start Point
   const match = path.match(/^M\s*([\d.-]+)[,\s]+([\d.-]+)/i)
   if (match) {
     return {

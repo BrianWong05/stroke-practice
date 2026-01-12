@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CharacterCategory } from '@/context/PracticeContext'
 import { numberPaths, StrokePath } from '@/data/numbers'
 import { alphabetPaths } from '@/data/alphabet'
 import { usePractice } from '@/hooks/usePractice'
-import StrokeGuideline, { parsePathStartPoint, StrokeStartPoint } from '@/components/shared/StrokeGuideline'
+import StrokeGuideline, { getIndicatorPosition, StrokeStartPoint } from '@/components/shared/StrokeGuideline'
 
 
 interface AlphanumericCanvasProps {
@@ -35,10 +35,17 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
   const strokeData = getStrokeData()
 
   // Calculate stroke starting points for guideline indicators
+  // Calculate stroke starting points for guideline indicators
   const startPoints = useMemo((): StrokeStartPoint[] => {
     if (!strokeData) return []
     return strokeData.paths
-      .map(path => parsePathStartPoint(path))
+      .map((path, index) => {
+        // Use manual override if available
+        if (strokeData.indicatorOverrides && strokeData.indicatorOverrides[index]) {
+          return strokeData.indicatorOverrides[index]!
+        }
+        return getIndicatorPosition(path, strokeData.viewBox)
+      })
       .filter((point): point is StrokeStartPoint => point !== null)
   }, [strokeData])
 

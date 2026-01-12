@@ -4,7 +4,7 @@ import { numberPaths, StrokePath } from '@/data/numbers'
 import { alphabetPaths } from '@/data/alphabet'
 import { usePractice } from '@/hooks/usePractice'
 import { usePathSampler, Point } from '@/hooks/usePathSampler'
-import StrokeGuideline, { parsePathStartPoint, StrokeStartPoint } from '@/components/shared/StrokeGuideline'
+import StrokeGuideline, { getIndicatorPosition, StrokeStartPoint } from '@/components/shared/StrokeGuideline'
 
 interface TracingCanvasProps {
   character: string
@@ -47,7 +47,13 @@ export default function TracingCanvas({ character, category }: TracingCanvasProp
    const startPoints = useMemo((): StrokeStartPoint[] => {
     if (!strokeData) return []
     return strokeData.paths
-      .map(path => parsePathStartPoint(path))
+      .map((path, index) => {
+        // Use manual override if available
+        if (strokeData.indicatorOverrides && strokeData.indicatorOverrides[index]) {
+          return strokeData.indicatorOverrides[index]!
+        }
+        return getIndicatorPosition(path, strokeData.viewBox)
+      })
       .filter((point): point is StrokeStartPoint => point !== null)
   }, [strokeData])
 

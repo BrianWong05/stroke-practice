@@ -25,6 +25,9 @@ export interface StrokePath {
   character: string
   viewBox: string
   paths: string[]
+  // Optional manual overrides for indicator positions
+  // index matches paths array
+  indicatorOverrides?: ({ x: number, y: number } | null)[]
 }
 
 // Uppercase letter paths (simplified for demonstration)
@@ -36,6 +39,11 @@ export const uppercasePaths: StrokePath[] = [
       'M50 20 L15 120',
       'M50 20 L85 120',
       'M30 80 L70 80'
+    ],
+    indicatorOverrides: [
+        { x: 32, y: 15 }, // 1. Left diagonal - shift Left
+        { x: 68, y: 15 }, // 2. Right diagonal - shift Right
+        null // 3. Crossbar - auto
     ]
   },
   {
@@ -138,6 +146,12 @@ export const uppercasePaths: StrokePath[] = [
       'M20 20 L50 120', // 2. Diagonal down to center
       'M50 120 L80 20', // 3. Diagonal up to right
       'M80 20 L80 120'  // 4. Vertical straight line down
+    ],
+    indicatorOverrides: [
+        { x: 10, y: 20 }, // 1. Shift left
+        { x: 35, y: 35 }, // 2. Shift down-right
+        null,
+        null
     ]
   },
   {
@@ -147,6 +161,11 @@ export const uppercasePaths: StrokePath[] = [
       'M25 20 L25 120', // 1. Vertical down
       'M25 20 L75 120', // 2. Diagonal down
       'M75 120 L75 20'  // 3. Vertical up
+    ],
+    indicatorOverrides: [
+        { x: 15, y: 20 }, // 1. Shift left
+        { x: 40, y: 35 }, // 2. Shift down-right
+        null
     ]
   },
   {
@@ -192,8 +211,8 @@ export const uppercasePaths: StrokePath[] = [
     character: 'T',
     viewBox: '0 0 100 140',
     paths: [
-      'M50 20 L50 120', // 1. Vertical straight line down
-      'M20 20 L80 20'   // 2. Top horizontal bar
+      'M20 20 L80 20',   // 1. Top horizontal bar
+      'M50 20 L50 120' // 2. Vertical straight line down
     ]
   },
   {
@@ -257,6 +276,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M70 55 C70 35 40 35 35 55 C30 75 35 95 50 95 C65 95 70 80 70 55',
       'M70 55 L70 95'
+    ],
+    indicatorOverrides: [
+        { x: 90, y: 55 }, // 1. Loop - right side
+        { x: 70, y: 35 }  // 2. Stem - top
     ]
   },
   {
@@ -265,6 +288,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M30 20 L30 95',
       'M30 55 C35 40 60 40 65 55 C70 75 65 95 50 95 C35 95 30 80 30 55'
+    ],
+    indicatorOverrides: [
+        { x: 30, y: 10 }, // 1. Stem - top
+        { x: 10, y: 55 }  // 2. Loop start - left side
     ]
   },
   {
@@ -280,6 +307,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M70 55 C65 40 40 40 35 55 C30 75 35 95 50 95 C65 95 70 80 70 55', // 1. Loop
       'M70 20 L70 95' // 2. Stem
+    ],
+    indicatorOverrides: [
+        { x: 50, y: 55 }, // 1. Loop - left/center
+        { x: 70, y: 10 }  // 2. Stem - top
     ]
   },
   {
@@ -303,6 +334,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M70 55 C70 35 40 35 35 55 C30 75 35 95 50 95 C65 95 70 80 70 55',
       'M70 55 L70 110 C70 130 40 130 30 115'
+    ],
+    indicatorOverrides: [
+        { x: 50, y: 55 }, // 1. Loop - center/left
+        { x: 70, y: 35 }  // 2. Tail - top right
     ]
   },
   {
@@ -311,6 +346,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M30 20 L30 95',
       'M30 55 C35 40 60 40 65 55 L65 95'
+    ],
+    indicatorOverrides: [
+        { x: 30, y: 10 }, // 1. Stem - top
+        { x: 10, y: 55 }  // 2. Arch - left side
     ]
   },
   {
@@ -319,6 +358,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M50 50 L50 95', // 1. Stem
       'M50 35 L50 37'  // 2. Dot
+    ],
+    indicatorOverrides: [
+        { x: 30, y: 60 }, // 1. Stem - move left and down to clear dot area
+        { x: 50, y: 15 }  // 2. Dot - move higher
     ]
   },
   {
@@ -327,6 +370,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M55 50 L55 110 C55 130 35 130 25 115', // 1. Tail
       'M55 35 L55 37' // 2. Dot
+    ],
+    indicatorOverrides: [
+        { x: 35, y: 60 }, // 1. Tail - move left and down
+        { x: 55, y: 15 }  // 2. Dot - move higher
     ]
   },
   {
@@ -352,6 +399,11 @@ export const lowercasePaths: StrokePath[] = [
       'M20 45 L20 95',
       'M20 55 C25 45 40 45 45 55 L45 95',
       'M45 55 C50 45 65 45 70 55 L70 95'
+    ],
+    indicatorOverrides: [
+        { x: 20, y: 35 }, // 1. Stem - shifted up
+        { x: 35, y: 40 }, // 2. Arch 1 - top center
+        { x: 60, y: 40 }  // 3. Arch 2 - top center
     ]
   },
   {
@@ -360,6 +412,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M30 45 L30 95',
       'M30 55 C35 40 60 40 65 55 L65 95'
+    ],
+    indicatorOverrides: [
+        { x: 30, y: 35 }, // 1. Stem - shifted up
+        { x: 50, y: 40 }  // 2. Arch - top center
     ]
   },
   {
@@ -375,6 +431,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M30 50 L30 120',
       'M30 55 C35 40 60 40 65 55 C70 75 65 95 50 95 C35 95 30 80 30 55'
+    ],
+    indicatorOverrides: [
+        { x: 30, y: 40 }, // 1. Stem - top 
+        { x: 10, y: 65 }  // 2. Loop start - left side (shifted down)
     ]
   },
   {
@@ -383,6 +443,10 @@ export const lowercasePaths: StrokePath[] = [
     paths: [
       'M70 55 C65 40 40 40 35 55 C30 75 35 95 50 95 C65 95 70 80 70 55', // 1. Loop
       'M70 50 L70 120' // 2. Stem
+    ],
+    indicatorOverrides: [
+        { x: 50, y: 55 }, // 1. Loop - center/left
+        { x: 70, y: 40 }  // 2. Stem - top
     ]
   },
   {

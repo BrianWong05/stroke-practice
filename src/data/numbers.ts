@@ -14,6 +14,9 @@ export interface StrokePath {
   character: string
   viewBox: string
   paths: string[]
+  // Optional manual overrides for indicator positions
+  // index matches paths array
+  indicatorOverrides?: ({ x: number, y: number } | null)[]
 }
 
 export const numberPaths: StrokePath[] = [
@@ -51,6 +54,10 @@ export const numberPaths: StrokePath[] = [
     paths: [
       'M60 20 L20 85 L85 85',
       'M60 50 L60 120'
+    ],
+    indicatorOverrides: [
+        null, // 1st stroke uses auto positioning
+        { x: 80, y: 50 }, // 2nd stroke: move to right side of vertical line to avoid crossing stroke 1
     ]
   },
   {
