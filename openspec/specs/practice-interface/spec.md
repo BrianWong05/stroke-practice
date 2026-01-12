@@ -26,19 +26,14 @@ The system SHALL display a ghost outline (light gray or semi-transparent) of the
 ---
 
 ### Requirement: Stroke Order Animation
-The system SHALL animate the correct stroke order when the user taps the "播放" (Play) button.
+The system SHALL animate the correct stroke order upon request, handling the transition between interactive quiz mode and passive animation.
 
-#### Scenario: Animate Chinese character
-- **WHEN** user taps "播放" while practicing a Chinese character
-- **THEN** `hanzi-writer` animates each stroke in the correct order
-
-#### Scenario: Animate English letter or Number
-- **WHEN** user taps "播放" while practicing an English letter or Number
-- **THEN** the SVG stroke path is animated sequentially showing the correct stroke order
-
-#### Scenario: Play resets stroke navigation state
-- **WHEN** user taps "播放" after stepping through some strokes
-- **THEN** the full animation plays from the beginning and all strokes are shown upon completion
+#### Scenario: Play button behavior in Quiz Mode
+- **Given** I am in Quiz Mode for a Chinese character
+- **When** I click the "播放" (Play) button
+- **Then** the quiz should be paused/canceled
+- **And** the full animation of the character should be played
+- **And** once finished, the quiz should be reset so I can try again
 
 ### Requirement: Canvas Clear
 The system SHALL clear the user's drawing on the canvas when the "清除" (Clear) button is tapped.
@@ -89,28 +84,39 @@ The system SHALL prominently display the current character being practiced above
 ---
 
 ### Requirement: Chinese Character Stroke Detection
-The system SHALL detect if the user is drawing strokes in the correct order for Chinese characters using `hanzi-writer` quiz mode.
+The system SHALL detect if the user is drawing strokes in the correct order for Chinese characters using `hanzi-writer` quiz mode, providing interactive writing capabilities.
 
-#### Scenario: Correct stroke detected
-- **WHEN** user draws a correct stroke in the correct order for a Chinese character
-- **THEN** the system accepts the stroke and highlights it
+#### Scenario: Initializing Interactive Mode
+- **Given** I am on the practice screen for a Chinese character
+- **When** the component loads
+- **Then** the `hanzi-writer` should be initialized in Quiz Mode
+- **And** the background outline should be visible
+- **And** the filled strokes should be hidden until correctly drawn
 
-#### Scenario: Incorrect stroke detected
-- **WHEN** user draws an incorrect stroke or out of order for a Chinese character
-- **THEN** the system provides visual feedback indicating the error
+#### Scenario: Correct stroke detection in Quiz Mode
+- **Given** I am in Quiz Mode
+- **When** I correctly trace a stroke in the right order and direction
+- **Then** the stroke should snap to the correct shape
+- **And** turn dark (`#333333`)
 
----
+#### Scenario: Incorrect stroke detection in Quiz Mode
+- **Given** I am in Quiz Mode
+- **When** I attempt an incorrect stroke or direction
+- **Then** the writer should provide visual feedback (flash/shake)
+- **And** the stroke should NOT be filled
+
+#### Scenario: Automatic Hints on Misses
+- **Given** I am in Quiz Mode
+- **When** I make 3 consecutive mistakes on the same stroke
+- **Then** a visual hint (outline or similar) should appear for that specific stroke
 
 ### Requirement: Stroke Feedback Messages
-The system SHALL display feedback messages to the user after stroke detection.
+The system SHALL display feedback messages to the user after stroke detection, including success toasts upon character completion.
 
-#### Scenario: Success feedback
-- **WHEN** user completes a character correctly
-- **THEN** the system displays "寫得好！" (Correct!)
-
-#### Scenario: Error feedback
-- **WHEN** user makes a stroke error
-- **THEN** the system displays "請再試一次" (Try Again)
+#### Scenario: Interactive Completion Success Toast
+- **Given** I have just correctly drawn the final stroke of a Chinese character
+- **When** the `onComplete` event is triggered
+- **Then** a success toast should appear with the text "太棒了！寫得好正確！"
 
 ### Requirement: Stroke Step Navigation
 The system SHALL provide buttons to step through individual strokes of a character one at a time.

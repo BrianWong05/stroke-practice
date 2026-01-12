@@ -17,7 +17,7 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const hanziRef = useRef<HTMLDivElement>(null)  // Separate ref for hanzi-writer
   const writerRef = useRef<HanziWriter | null>(null)
-  const { state, setTotalStrokes, setAnimating, resetStrokes, showFullCharacter } = usePractice()
+  const { state, setTotalStrokes, setAnimating, resetStrokes, showFeedback } = usePractice()
   const [size, setSize] = useState(300)
   const prevStrokeIndexRef = useRef(0)
   const justFinishedPlayRef = useRef(false)
@@ -67,15 +67,23 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
       showCharacter: false,
       strokeAnimationSpeed: 0.3,
       delayBetweenStrokes: 1000,
-      strokeColor: '#1e293b',
+      strokeColor: '#333333',
       outlineColor: '#94a3b8',
-      drawingColor: '#6366f1',
-      radicalColor: '#1e293b', // Same as strokeColor
+      drawingColor: '#333333',
+      radicalColor: '#333333',
       highlightColor: '#a5b4fc',
       showHintAfterMisses: 3,
+      drawingWidth: 40,
     })
 
     writerRef.current = writer
+
+    // Start quiz mode immediately
+    writer.quiz({
+      onComplete: () => {
+        showFeedback('success')
+      }
+    })
 
     // Get stroke count and stroke data for guidelines
     const charData = HanziWriter.loadCharacterData(character)
@@ -94,6 +102,9 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     })
 
     return () => {
+      if (writerRef.current) {
+        writerRef.current.cancelQuiz()
+      }
       writerRef.current = null
     }
   }, [character, size, setTotalStrokes])
@@ -137,8 +148,12 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const handlePlay = useCallback(() => {
     if (!writerRef.current || !strokeData) return
     
+    // Cancel any active quiz
+    writerRef.current.cancelQuiz()
+    
     resetStrokes()
     writerRef.current.hideCharacter()
+    writerRef.current.showOutline()
     setAnimating(true)
     setIsPlayMode(true)
     setAnimatedStrokeCount(0)
@@ -152,7 +167,15 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
         setAnimating(false)
         setIsPlayMode(false)
         justFinishedPlayRef.current = true
-        showFullCharacter()
+        
+        // Show full character briefly then restart quiz
+        setTimeout(() => {
+           // Reset for quiz
+           writerRef.current?.hideCharacter()
+           writerRef.current?.quiz({
+             onComplete: () => showFeedback('success')
+           })
+        }, 1000)
         return
       }
       
@@ -173,15 +196,21 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
     setTimeout(() => {
       animateNextStroke(0)
     }, 500)
-  }, [strokeData, setAnimating, resetStrokes, showFullCharacter])
+  }, [strokeData, setAnimating, resetStrokes, showFeedback])
 
   // Handle clear button
   const handleClear = useCallback(() => {
     if (writerRef.current) {
+      writerRef.current.cancelQuiz()
       writerRef.current.hideCharacter()
+      writerRef.current.showOutline()
       prevStrokeIndexRef.current = 0
+      // Restart quiz
+      writerRef.current.quiz({
+        onComplete: () => showFeedback('success')
+      })
     }
-  }, [])
+  }, [showFeedback])
 
   // Connect to buttons
   useEffect(() => {

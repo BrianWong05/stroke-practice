@@ -30,6 +30,7 @@ export const zhHK = {
   // Feedback
   correct: '寫得好！',
   tryAgain: '請再試一次',
+  successFeedback: '太棒了！寫得好正確！',
   
   // Hints
   strokeOrderHint: '筆順提示',

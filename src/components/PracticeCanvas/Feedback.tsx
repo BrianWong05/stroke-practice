@@ -8,7 +8,7 @@ export default function Feedback() {
 
   return (
     <div className={`feedback ${state.feedback}`}>
-      {state.feedback === 'success' ? t('correct') : t('tryAgain')}
+      {state.feedback === 'success' ? t('successFeedback') : t('tryAgain')}
     </div>
   )
 }
