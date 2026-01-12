@@ -2,7 +2,7 @@ import { Play, Eraser, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, E
 import { t } from '@/i18n'
 import { usePractice } from '@/hooks/usePractice'
 import ChineseCanvas from './ChineseCanvas'
-import AlphanumericCanvas from './AlphanumericCanvas'
+import TracingCanvas from './TracingCanvas'
 import Feedback from './Feedback'
 
 export default function PracticeCanvas() {
@@ -38,7 +38,7 @@ export default function PracticeCanvas() {
           {isChinese ? (
             <ChineseCanvas character={currentCharacter} />
           ) : (
-            <AlphanumericCanvas character={currentCharacter} category={state.category!} />
+            <TracingCanvas character={currentCharacter} category={state.category!} />
           )}
         </div>
       </div>
