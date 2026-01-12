@@ -11,9 +11,9 @@ interface TracingCanvasProps {
   category: CharacterCategory
 }
 
-const ERROR_THRESHOLD = 30 // px allowed deviation
-const COMPLETION_RATIO = 0.85 // 85% coverage required
-const LOOK_AHEAD_BUFFER = 15 
+const ERROR_THRESHOLD_MOUSE = 40 // px allowed deviation for mouse
+const ERROR_THRESHOLD_TOUCH = 100 // px allowed deviation for touch (much larger for fingers)
+const COMPLETION_RATIO = 0.85 // 85% coverage required 
 
 export default function TracingCanvas({ character, category }: TracingCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -134,13 +134,15 @@ export default function TracingCanvas({ character, category }: TracingCanvasProp
     pt.x = e.clientX
     pt.y = e.clientY
     // Transform to SVG coordinates
-    const svgP = pt.matrixTransform(svgRef.current.getScreenCTM()?.inverse())
+    const ctm = svgRef.current.getScreenCTM()
+    if (!ctm) return null
+    const svgP = pt.matrixTransform(ctm.inverse())
     return { x: svgP.x, y: svgP.y }
   }
   const getDist = (p1: Point, p2: Point) => Math.hypot(p1.x - p2.x, p1.y - p2.y)
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (isPlayMode) return // No interaction during play
+    if (isPlayMode) return
     if (activeStrokeIndex >= (strokeData?.paths.length || 0)) return
     if (!targetPoints.length) return
     
@@ -150,15 +152,31 @@ export default function TracingCanvas({ character, category }: TracingCanvasProp
     const p = getEventPoint(e)
     if (!p) return
 
-    // Check start point proximity
-    if (getDist(p, targetPoints[0]) > ERROR_THRESHOLD) {
+    // Use larger threshold for touch input
+    const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen'
+    const threshold = isTouch ? ERROR_THRESHOLD_TOUCH : ERROR_THRESHOLD_MOUSE
+    
+    // Find the closest point ANYWHERE on the current stroke path
+    let closestDist = Infinity
+    let closestIndex = -1
+    
+    for (let i = 0; i < targetPoints.length; i++) {
+      const d = getDist(p, targetPoints[i])
+      if (d < closestDist) {
+        closestDist = d
+        closestIndex = i
+      }
+    }
+    
+    // If touching anywhere near the stroke path, start drawing
+    if (closestDist > threshold) {
       triggerError()
       return
     }
 
     setIsDragging(true)
     setTracePath([p])
-    maxReachedIndexRef.current = 0
+    maxReachedIndexRef.current = closestIndex // Start from wherever they touched
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -167,12 +185,14 @@ export default function TracingCanvas({ character, category }: TracingCanvasProp
     const p = getEventPoint(e)
     if (!p) return
 
+    // Use larger threshold for touch input
+    const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen'
+    const threshold = isTouch ? ERROR_THRESHOLD_TOUCH : ERROR_THRESHOLD_MOUSE
+
     // Find closest point in targetPoints
-    // search optimization: check around maxReached
     let closestDist = Infinity
     let closestIndex = -1
     
-    // Check all points (robustness) or window
     for (let i = 0; i < targetPoints.length; i++) {
         const d = getDist(p, targetPoints[i])
         if (d < closestDist) {
@@ -181,20 +201,15 @@ export default function TracingCanvas({ character, category }: TracingCanvasProp
         }
     }
 
-    if (closestDist > ERROR_THRESHOLD) {
-        triggerError()
+    // If too far from path, just skip this point (don't error)
+    // This allows the user to continue if they get back on track
+    if (closestDist > threshold) {
+        // Don't trigger error - just don't record this point
+        // User can continue tracing if they get back on track
         return
     }
 
-    // Direction check
-    // Ensure we aren't jumping waaaay ahead
-    if (closestIndex > maxReachedIndexRef.current + LOOK_AHEAD_BUFFER) {
-        // Too fast or skip?
-        // Maybe ignore update but keep dragging? 
-        // Or strict error? Let's be lenient for now, purely updating trace
-    }
-
-    // Update progress
+    // Update progress (allow forward movement)
     if (closestIndex > maxReachedIndexRef.current) {
         maxReachedIndexRef.current = closestIndex
     }
@@ -290,6 +305,7 @@ export default function TracingCanvas({ character, category }: TracingCanvasProp
                     strokeWidth="12"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    style={{ pointerEvents: 'none' }}
                 />
              ))}
 
@@ -328,7 +344,7 @@ export default function TracingCanvas({ character, category }: TracingCanvasProp
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className={className}
-                        style={style}
+                        style={{ ...style, pointerEvents: 'none' }}
                     />
                  )
              })}
@@ -345,7 +361,8 @@ export default function TracingCanvas({ character, category }: TracingCanvasProp
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeDasharray="0 0" 
-                    className="opacity-10" // Just a faint fill hint?
+                    style={{ pointerEvents: 'none' }}
+                    className="opacity-10"
                  />
              )}
 
