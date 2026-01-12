@@ -49,6 +49,7 @@ export default defineConfig({
   server: {
     host: true
   },
+  base: '/stroke-practice/',
   preview: {
     host: true
   }

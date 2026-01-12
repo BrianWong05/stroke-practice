@@ -1,22 +1,29 @@
 import { ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { t } from '@/i18n'
-import { usePractice } from '@/hooks/usePractice'
 
 interface LayoutProps {
   children: ReactNode
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { state, goHome, backToGrid } = usePractice()
-  const showBackButton = state.view !== 'categories'
+  const location = useLocation()
+  const navigate = useNavigate()
+  
+  const showBackButton = location.pathname !== '/'
 
   const handleBack = () => {
-    if (state.view === 'practice') {
-      backToGrid()
-    } else {
-      goHome()
+    const pathParts = location.pathname.split('/').filter(Boolean)
+    
+    // If deep (/category/index), go up one level
+    if (pathParts.length > 1) {
+      navigate(`/${pathParts[0]}`)
+      return
     }
+    
+    // Otherwise go home
+    navigate('/')
   }
 
   return (

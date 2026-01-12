@@ -1,8 +1,10 @@
 import { useContext, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PracticeContext, CharacterCategory } from '@/context/PracticeContext'
 
 export function usePractice() {
   const context = useContext(PracticeContext)
+  const navigate = useNavigate()
   
   if (!context) {
     throw new Error('usePractice must be used within a PracticeProvider')
@@ -10,21 +12,34 @@ export function usePractice() {
 
   const { state, dispatch } = context
 
+  // Navigation replaced by Router
   const selectCategory = useCallback((category: CharacterCategory) => {
-    dispatch({ type: 'SET_CATEGORY', payload: category })
-  }, [dispatch])
+    navigate(`/${category}`)
+  }, [navigate])
 
   const goHome = useCallback(() => {
+    navigate('/')
     dispatch({ type: 'GO_HOME' })
-  }, [dispatch])
+  }, [navigate, dispatch])
 
   const selectCharacter = useCallback((index: number) => {
+    // If URL contains category we should ideally navigate to it, but context doesn't know category anymore
+    // This is mainly used by grid which knows category. 
+    // We will let the component handle navigation or pass category here if needed.
+    // For now, we update internal state for consistency
     dispatch({ type: 'SELECT_CHARACTER', payload: index })
   }, [dispatch])
 
-  const backToGrid = useCallback(() => {
-    dispatch({ type: 'BACK_TO_GRID' })
+  // Helpers to set data from Route components
+  const setCharacters = useCallback((chars: string[]) => {
+    dispatch({ type: 'SET_CHARACTERS', payload: chars })
   }, [dispatch])
+
+  // Deprecated but kept for compatibility during refactor if needed, 
+  // though components should likely use Link or navigate directly
+  const backToGrid = useCallback(() => {
+    navigate(-1)
+  }, [navigate])
 
 
   const nextCharacter = useCallback(() => {
@@ -76,6 +91,10 @@ export function usePractice() {
   }, [dispatch])
 
   const setCustomCharacter = useCallback((char: string) => {
+    navigate(`/custom?char=${encodeURIComponent(char)}`)
+  }, [navigate])
+
+  const loadCustomCharacter = useCallback((char: string) => {
     dispatch({ type: 'SET_CUSTOM_CHARACTER', payload: char })
   }, [dispatch])
 
@@ -90,6 +109,7 @@ export function usePractice() {
     selectCategory,
     goHome,
     selectCharacter,
+    setCharacters,
     backToGrid,
 
     nextCharacter,
@@ -104,6 +124,7 @@ export function usePractice() {
     setTotalStrokes,
     toggleGuidelines,
     setCustomCharacter,
+    loadCustomCharacter,
     currentCharacter,
     totalCharacters,
     progress,

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { t } from '@/i18n'
 import { usePractice } from '@/hooks/usePractice'
 import { CharacterCategory } from '@/context/PracticeContext'
@@ -9,7 +10,12 @@ interface CharacterGridProps {
 }
 
 export default function CharacterGrid({ category }: CharacterGridProps) {
-  const { state, selectCharacter } = usePractice()
+  const { state } = usePractice()
+  const navigate = useNavigate()
+  
+  const handleSelect = (index: number) => {
+    navigate(`/${category}/${index}`)
+  }
   
   
   const getTitle = () => {
@@ -32,7 +38,7 @@ export default function CharacterGrid({ category }: CharacterGridProps) {
                 <button
                   key={`upper-${char}`}
                   className="bg-white rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all aspect-square flex items-center justify-center text-3xl font-bold text-slate-700 border border-slate-100 active:bg-slate-50"
-                  onClick={() => selectCharacter(index)}
+                  onClick={() => handleSelect(index)}
                 >
                   {char}
                 </button>
@@ -48,7 +54,7 @@ export default function CharacterGrid({ category }: CharacterGridProps) {
                 <button
                   key={`lower-${char}`}
                   className="bg-white rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all aspect-square flex items-center justify-center text-3xl font-bold text-slate-700 border border-slate-100 active:bg-slate-50"
-                  onClick={() => selectCharacter(uppercaseAlphabet.length + index)}
+                  onClick={() => handleSelect(uppercaseAlphabet.length + index)}
                 >
                   {char}
                 </button>
@@ -70,7 +76,7 @@ export default function CharacterGrid({ category }: CharacterGridProps) {
             <button
               key={char}
               className="bg-white rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all aspect-square flex items-center justify-center text-4xl font-bold text-slate-700 border border-slate-100 active:bg-slate-50 font-chinese" 
-              onClick={() => selectCharacter(index)}
+              onClick={() => handleSelect(index)}
             >
               {char}
             </button>

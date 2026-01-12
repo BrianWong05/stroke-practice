@@ -1,11 +1,14 @@
+import { useParams } from 'react-router-dom'
 import { Play, Eraser, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, EyeOff } from 'lucide-react'
 import { t } from '@/i18n'
 import { usePractice } from '@/hooks/usePractice'
+import { CharacterCategory } from '@/context/PracticeContext'
 import ChineseCanvas from './ChineseCanvas'
 import TracingCanvas from './TracingCanvas'
 import Feedback from './Feedback'
 
 export default function PracticeCanvas() {
+  const { category } = useParams<{ category: CharacterCategory }>()
   const {
     state,
     currentCharacter,
@@ -18,7 +21,8 @@ export default function PracticeCanvas() {
     toggleGuidelines,
   } = usePractice()
 
-  const isChinese = state.category === 'chinese'
+  // Default to chinese if no category (e.g. custom mode)
+  const isChinese = category === 'chinese' || !category
   const canPrevStroke = state.currentStrokeIndex > 0
   const canNextStroke = state.currentStrokeIndex < state.totalStrokes
 
@@ -38,7 +42,7 @@ export default function PracticeCanvas() {
           {isChinese ? (
             <ChineseCanvas character={currentCharacter} />
           ) : (
-            <TracingCanvas character={currentCharacter} category={state.category!} />
+            <TracingCanvas character={currentCharacter} category={category!} />
           )}
         </div>
       </div>

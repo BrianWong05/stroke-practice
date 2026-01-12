@@ -1,0 +1,7 @@
+- [x] Install `gh-pages` and `react-router-dom`
+- [x] Configure `vite.config.ts` base path
+- [x] Refactor `App.tsx` to use `HashRouter`
+- [x] Update `PracticeContext` to remove view state
+- [x] Update `usePractice` to sync with Router
+- [x] Add deploy scripts to `package.json`
+- [x] Verify build and navigation logic

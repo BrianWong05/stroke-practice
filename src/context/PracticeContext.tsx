@@ -1,15 +1,9 @@
 import { createContext, useReducer, ReactNode } from 'react'
-import { chineseCharacters } from '@/data/characters'
-import { numbers } from '@/data/numbers'
-import { englishAlphabet } from '@/data/alphabet'
-
+// Character data logic moved to hooks/components
 export type CharacterCategory = 'numbers' | 'english' | 'chinese'
-export type ViewMode = 'categories' | 'grid' | 'practice'
 
 
 export interface PracticeState {
-  category: CharacterCategory | null
-  view: ViewMode
   currentIndex: number
   customCharacter: string | null
 
@@ -22,9 +16,8 @@ export interface PracticeState {
 }
 
 type PracticeAction =
-  | { type: 'SET_CATEGORY'; payload: CharacterCategory }
+  | { type: 'SET_CHARACTERS'; payload: string[] }
   | { type: 'SELECT_CHARACTER'; payload: number }
-  | { type: 'BACK_TO_GRID' }
   | { type: 'GO_HOME' }
 
   | { type: 'NEXT_CHARACTER' }
@@ -40,20 +33,9 @@ type PracticeAction =
   | { type: 'TOGGLE_GUIDELINES' }
   | { type: 'SET_CUSTOM_CHARACTER'; payload: string }
 
-function getCharactersForCategory(category: CharacterCategory): string[] {
-  switch (category) {
-    case 'numbers':
-      return numbers
-    case 'english':
-      return englishAlphabet
-    case 'chinese':
-      return chineseCharacters
-  }
-}
+// Helper removed
 
 const initialState: PracticeState = {
-  category: null,
-  view: 'categories',
   currentIndex: 0,
   customCharacter: null,
 
@@ -67,36 +49,24 @@ const initialState: PracticeState = {
 
 function practiceReducer(state: PracticeState, action: PracticeAction): PracticeState {
   switch (action.type) {
-    case 'SET_CATEGORY': {
-      const characters = getCharactersForCategory(action.payload)
+    case 'SET_CHARACTERS':
       return {
         ...state,
-        category: action.payload,
-        view: 'grid',
+        characters: action.payload,
+        // Reset state when category changes
         currentIndex: 0,
-
-        characters,
         feedback: null,
         currentStrokeIndex: 0,
         totalStrokes: 0,
       }
-    }
     case 'SELECT_CHARACTER':
       return {
         ...state,
-        view: 'practice',
         currentIndex: action.payload,
         customCharacter: null,
         feedback: null,
         currentStrokeIndex: 0,
         totalStrokes: 0,
-      }
-    case 'BACK_TO_GRID':
-      return {
-        ...state,
-        view: 'grid',
-        customCharacter: null,
-        feedback: null,
       }
     case 'GO_HOME':
 
@@ -152,7 +122,6 @@ function practiceReducer(state: PracticeState, action: PracticeAction): Practice
     case 'SET_CUSTOM_CHARACTER':
       return {
         ...state,
-        view: 'practice',
         customCharacter: action.payload,
         feedback: null,
         currentStrokeIndex: 0,
