@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { CharacterCategory } from '@/context/PracticeContext'
 import { numberPaths, StrokePath } from '@/data/numbers'
 import { alphabetPaths } from '@/data/alphabet'
 import { usePractice } from '@/hooks/usePractice'
+import StrokeGuideline, { parsePathStartPoint, StrokeStartPoint } from '@/components/shared/StrokeGuideline'
+
 
 interface AlphanumericCanvasProps {
   character: string
@@ -31,6 +33,14 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
   }, [character, category])
 
   const strokeData = getStrokeData()
+
+  // Calculate stroke starting points for guideline indicators
+  const startPoints = useMemo((): StrokeStartPoint[] => {
+    if (!strokeData) return []
+    return strokeData.paths
+      .map(path => parsePathStartPoint(path))
+      .filter((point): point is StrokeStartPoint => point !== null)
+  }, [strokeData])
 
   // Set total strokes and reset when character changes
   useEffect(() => {
@@ -140,12 +150,22 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
 
   return (
     <div className="w-full h-full handwriting-lines relative bg-white rounded-lg overflow-hidden flex items-center justify-center p-4">
-      <svg
-        ref={svgRef}
-        viewBox={strokeData.viewBox}
-        className="w-full h-full max-w-[300px] max-h-[300px]"
-        preserveAspectRatio="xMidYMid meet"
-        style={{ touchAction: 'none' }}
+      {/* Container for both guideline and character SVG to ensure alignment */}
+      <div className="relative w-full h-full max-w-[300px] max-h-[300px]">
+        {/* Stroke order guidelines - visible by default */}
+        <StrokeGuideline
+          paths={strokeData.paths}
+          viewBox={strokeData.viewBox}
+          startPoints={startPoints}
+          visible={true}
+        />
+
+        <svg
+          ref={svgRef}
+          viewBox={strokeData.viewBox}
+          className="w-full h-full"
+          preserveAspectRatio="xMidYMid meet"
+          style={{ touchAction: 'none' }}
       >
         {/* Ghost outline - always visible */}
         {strokeData.paths.map((path, index) => (
@@ -188,6 +208,7 @@ export default function AlphanumericCanvas({ character, category }: Alphanumeric
           )
         })}
       </svg>
+      </div>
 
       {/* Stroke order indicators */}
       <style>{`

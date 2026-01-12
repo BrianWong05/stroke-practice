@@ -1,18 +1,28 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import HanziWriter from 'hanzi-writer'
 import { usePractice } from '@/hooks/usePractice'
+import NumberIndicator from '@/components/shared/StrokeGuideline/NumberIndicator'
 
 interface ChineseCanvasProps {
   character: string
 }
 
+// Stroke data extracted from hanzi-writer for guidelines
+interface StrokeGuidelineData {
+  strokes: string[]       // SVG path strings
+  medians: number[][][]   // Start points: medians[strokeIndex][0] = [x, y]
+}
+
 export default function ChineseCanvas({ character }: ChineseCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const hanziRef = useRef<HTMLDivElement>(null)  // Separate ref for hanzi-writer
   const writerRef = useRef<HanziWriter | null>(null)
   const { state, setTotalStrokes, setAnimating, resetStrokes, showFullCharacter } = usePractice()
   const [size, setSize] = useState(300)
   const prevStrokeIndexRef = useRef(0)
   const justFinishedPlayRef = useRef(false)
+  const [strokeData, setStrokeData] = useState<StrokeGuidelineData | null>(null)
+
 
   // Observe container size
   useEffect(() => {
@@ -38,15 +48,15 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
 
   // Initialize HanziWriter
   useEffect(() => {
-    if (!containerRef.current || !character || size <= 0) return
+    if (!hanziRef.current || !character || size <= 0) return
 
     // Clear previous writer
-    containerRef.current.innerHTML = ''
+    hanziRef.current.innerHTML = ''
     writerRef.current = null
     prevStrokeIndexRef.current = 0
 
     // Create new writer with fixed size
-    const writer = HanziWriter.create(containerRef.current, character, {
+    const writer = HanziWriter.create(hanziRef.current, character, {
       width: size,
       height: size,
       padding: 20,
@@ -64,14 +74,20 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
 
     writerRef.current = writer
 
-    // Get stroke count and set in context
+    // Get stroke count and stroke data for guidelines
     const charData = HanziWriter.loadCharacterData(character)
     charData.then((data) => {
       if (data) {
         setTotalStrokes(data.strokes.length)
+        // Store stroke data for guideline rendering
+        setStrokeData({
+          strokes: data.strokes,
+          medians: data.medians
+        })
       }
     }).catch(() => {
       setTotalStrokes(1) // Fallback
+      setStrokeData(null)
     })
 
     return () => {
@@ -179,6 +195,69 @@ export default function ChineseCanvas({ character }: ChineseCanvasProps) {
           className="absolute top-0 bottom-0 w-px bg-slate-300" 
           style={{ left: '50%', borderStyle: 'dashed' }}
         />
+      </div>
+
+      {/* Wrapper for hanzi-writer and guidelines overlay */}
+      <div 
+        className="relative"
+        style={{ width: size, height: size }}
+      >
+        {/* Hanzi-writer container */}
+        <div 
+          ref={hanziRef}
+          className="absolute inset-0"
+        />
+
+        {/* Stroke order guidelines overlay */}
+        {strokeData && (
+          <svg
+            viewBox="0 0 1024 1024"
+            className="stroke-guideline-container absolute pointer-events-none"
+            style={{
+              // Match hanzi-writer's internal padding: inset by padding on all sides
+              top: `${20 * 100 / size}%`,
+              left: `${20 * 100 / size}%`,
+              width: `${(size - 40) * 100 / size}%`,
+              height: `${(size - 40) * 100 / size}%`
+            }}
+            preserveAspectRatio="xMidYMid meet"
+          >
+            {/* Transform group to flip Y-axis (Make Me a Hanzi uses top-left at (0,900)) */}
+            <g transform="scale(1, -1) translate(0, -900)">
+              {/* Dashed stroke paths */}
+              {strokeData.strokes.map((strokePath, index) => (
+                <path
+                  key={`guideline-stroke-${index}`}
+                  d={strokePath}
+                  className="stroke-guideline-path"
+                  fill="none"
+                  stroke="#d1d5db"
+                  strokeWidth="20"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray="40 20"
+                />
+              ))}
+
+              {/* Number indicators at stroke starting points */}
+              {strokeData.medians.map((median, index) => {
+                // First point of each median is the stroke start
+                const startPoint = median[0]
+                if (!startPoint) return null
+                return (
+                  <g key={`number-${index}`} transform={`translate(${startPoint[0]}, ${startPoint[1]}) scale(1, -1)`}>
+                    <NumberIndicator
+                      number={index}
+                      x={0}
+                      y={0}
+                      size={60}
+                    />
+                  </g>
+                )
+              })}
+            </g>
+          </svg>
+        )}
       </div>
     </div>
   )

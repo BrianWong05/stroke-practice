@@ -234,3 +234,17 @@ body {
     transform: translate(-50%, 0);
   }
 }
+
+/* Stroke Order Guideline Styles */
+.stroke-guideline-container {
+  z-index: 5;
+}
+
+.stroke-guideline-path {
+  opacity: 0.8;
+}
+
+.stroke-number-indicator {
+  font-family: var(--font-sans);
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.8));
+}
