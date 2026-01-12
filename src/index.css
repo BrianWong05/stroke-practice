@@ -201,14 +201,14 @@ body {
 /* Feedback toast */
 .feedback {
   position: fixed;
-  bottom: 2rem;
+  top: 15%;
   left: 50%;
   transform: translateX(-50%);
   padding: 1rem 2rem;
   border-radius: 1rem;
   font-weight: 500;
   font-size: 1.25rem;
-  animation: slideUp 0.3s ease;
+  animation: slideDown 0.3s ease;
   z-index: 100;
 }
 
@@ -224,10 +224,10 @@ body {
   border: 2px solid #ef4444;
 }
 
-@keyframes slideUp {
+@keyframes slideDown {
   from {
     opacity: 0;
-    transform: translate(-50%, 1rem);
+    transform: translate(-50%, -1rem);
   }
   to {
     opacity: 1;
