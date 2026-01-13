@@ -25,3 +25,14 @@ dist-ssr
 
 # OpenSpec / Agent files (optional, but good to keep clean)
 .gemini/
+
+# Android / Capacitor
+android/app/build/
+android/.gradle/
+android/build/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/
+*.apk
+*.aab
+*.keystore

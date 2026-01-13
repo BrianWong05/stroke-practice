@@ -6,13 +6,18 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:android": "tsc -b && VITE_BASE=./ vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "download:hanzi": "node scripts/download-hanzi.js",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "cap:sync": "npm run build:android && npx cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
     "hanzi-writer": "^3.5.1",
     "lucide-react": "^0.469.0",
     "react": "^19.0.0",

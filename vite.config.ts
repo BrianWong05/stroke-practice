@@ -51,7 +51,7 @@ export default defineConfig({
   server: {
     host: true
   },
-  base: '/stroke-practice/',
+  base: process.env.VITE_BASE || '/stroke-practice/',
   preview: {
     host: true
   }
