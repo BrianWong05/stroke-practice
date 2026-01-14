@@ -1,0 +1,4 @@
+- [x] Refactor `src/data/characters.ts` to export `chineseCurriculum` and `chineseCharacters` (derived) <!-- id: 0 -->
+- [x] Update `scripts/download-hanzi.js` to parse the new file structure <!-- id: 1 -->
+- [x] Verify `src/App.tsx` and `src/utils/hanziDataLoader.ts` function correctly with the refactored data <!-- id: 2 -->
+- [x] Verify offline data downloading matches the new curriculum list <!-- id: 3 -->

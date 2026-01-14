@@ -11,21 +11,19 @@ const __dirname = path.dirname(__filename);
 const charactersPath = path.join(__dirname, '../src/data/characters.ts');
 const fileContent = fs.readFileSync(charactersPath, 'utf-8');
 
-// Extract the content between brackets []
-const match = fileContent.match(/export const chineseCharacters: string\[\] = \[\s*([\s\S]*?)\]/);
+// Extract all characters from the file content
+// We look for single characters in quotes, e.g. '一'
+const matches = fileContent.match(/'[\u4E00-\u9FFF]'/g);
 
-if (!match) {
-  console.error('Could not find chineseCharacters array in src/data/characters.ts');
+if (!matches) {
+  console.error('Could not find any chinese characters in src/data/characters.ts');
   process.exit(1);
 }
 
-// Parse the extracted string into an array
-const CHARACTERS = match[1]
-  .split(',')
-  .map(char => char.trim().replace(/['"]/g, '')) // Remove quotes and whitespace
-  .filter(char => char.length === 1); // Ensure valid characters
+// Parse and deduplicate
+const CHARACTERS = [...new Set(matches.map(m => m.replace(/'/g, '')))];
 
-console.log(`Found ${CHARACTERS.length} characters to download.`);
+console.log(`Found ${CHARACTERS.length} unique characters to download.`);
 
 const OUTPUT_DIR = path.join(__dirname, '../public/hanzi-data');
 
