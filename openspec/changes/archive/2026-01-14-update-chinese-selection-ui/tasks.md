@@ -1,0 +1,8 @@
+- [x] Refactor `CharacterGrid/index.tsx` to handle `chineseCurriculum` <!-- id: 0 -->
+    - Import `chineseCurriculum`
+    - Add state for open sections (default level-1)
+    - Implement accordion rendering logic
+    - Maintain global index calculation for selection
+- [x] Add sticky positioning to `CustomCharacterInput` <!-- id: 1 -->
+- [x] Style accordion headers and transitions <!-- id: 2 -->
+- [x] Verify functionality (expand/collapse, character selection, responsive layout) <!-- id: 3 -->
