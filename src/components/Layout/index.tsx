@@ -14,6 +14,12 @@ export default function Layout({ children }: LayoutProps) {
   const showBackButton = location.pathname !== '/'
 
   const handleBack = () => {
+    // Custom route -> Back to Chinese selection
+    if (location.pathname === '/custom') {
+      navigate('/chinese')
+      return
+    }
+
     const pathParts = location.pathname.split('/').filter(Boolean)
     
     // If deep (/category/index), go up one level
